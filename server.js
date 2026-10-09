@@ -5,9 +5,11 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
-
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept', 'Origin']
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
@@ -302,8 +304,10 @@ function normalizeSong(item) {
 // Endpoint streaming audio proxy untuk mengatasi kendala CORS pada audio player
 app.get('/api/stream', async (req, res) => {
     try {
-        const streamUrl = req.query.url;
-        if (!streamUrl) return res.status(400).send('URL required');
+        const streamUrl = (req.query.url || '').trim();
+        if (!streamUrl) {
+            return res.status(400).json({ success: false, error: 'Query parameter "url" is required' });
+        }
 
         const range = req.headers.range;
         const reqHeaders = {
@@ -321,6 +325,8 @@ app.get('/api/stream', async (req, res) => {
 
         res.set({
             'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Range, Accept, Origin, Content-Type',
             'Content-Type': response.headers['content-type'] || 'audio/mpeg',
             'Accept-Ranges': 'bytes'
         });
@@ -334,9 +340,17 @@ app.get('/api/stream', async (req, res) => {
 
         res.status(response.status);
         response.data.pipe(res);
+
+        req.on('close', () => {
+            if (response.data && typeof response.data.destroy === 'function') {
+                response.data.destroy();
+            }
+        });
     } catch (err) {
         console.error('[Stream Error]', err.message);
-        res.status(500).send('Stream error');
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, error: 'Stream error', detail: err.message });
+        }
     }
 });
 
@@ -344,7 +358,7 @@ app.get('/api/stream', async (req, res) => {
 app.get('/api/search', async (req, res) => {
     const query = (req.query.q || req.query.query || '').trim();
     if (!query) {
-        return res.json({ success: false, error: 'Query required' });
+        return res.status(400).json({ success: false, error: 'Query parameter "q" or "query" is required' });
     }
 
     let finalResults = null;
@@ -463,34 +477,55 @@ app.get('/api/search', async (req, res) => {
 
 app.get('/api/lyrics', async (req, res) => {
     try {
-        const { title, artist } = req.query;
-        if (!title || !artist) return res.status(400).json({ error: 'required' });
+        const title = (req.query.title || '').trim();
+        const artist = (req.query.artist || '').trim();
+        if (!title || !artist) {
+            return res.status(400).json({ success: false, error: 'Query parameters "title" and "artist" are required' });
+        }
         const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
-        const response = await axios.get(url, { timeout: 10000 });
-        res.json(response.data);
+        const response = await axios.get(url, { timeout: 8000 });
+        return res.json({ success: true, lyrics: response.data.lyrics || '' });
     } catch (err) {
-        res.status(500).json({ error: 'Lyrics not found' });
+        return res.status(err.response?.status === 404 ? 404 : 500).json({
+            success: false,
+            error: 'Lyrics not found'
+        });
     }
 });
 
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', app: 'GOYZFY', version: '8.0.0' });
+    res.json({
+        status: 'ok',
+        app: 'GOYZFY',
+        version: '8.0.0',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    });
 });
 
-app.get('*', (req, res) => {
+// Wildcard route untuk serving index.html (kompatibel Express v4 & Express v5 /*splat)
+const sendIndexHtml = (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
-});
+};
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log('');
-    console.log('╔══════════════════════════════════════════════╗');
-    console.log('║  🎵 GOYZFY v8.0 - SERVER RUNNING            ║');
-    console.log('╠══════════════════════════════════════════════╣');
-    console.log(`║  🌐 Buka di browser:                         ║`);
-    console.log(`║     http://0.0.0.0:${PORT}                   ║`);
-    console.log('║                                              ║');
-    console.log('║  👤 Creator: Bumi (Agoy) - Tambun Utara     ║');
-    console.log('║  ⚡ Status : READY                          ║');
-    console.log('╚══════════════════════════════════════════════╝');
-    console.log('');
-});
+try { app.get('/*splat', sendIndexHtml); } catch (e) {}
+try { app.get('*', sendIndexHtml); } catch (e) {}
+
+if (require.main === module && process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT && process.env.PORT !== '8080' ? process.env.PORT : 3000;
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log('');
+        console.log('╔══════════════════════════════════════════════╗');
+        console.log('║  🎵 GOYZFY v8.0 - SERVER RUNNING            ║');
+        console.log('╠══════════════════════════════════════════════╣');
+        console.log(`║  🌐 Buka di browser:                         ║`);
+        console.log(`║     http://0.0.0.0:${PORT}                   ║`);
+        console.log('║                                              ║');
+        console.log('║  👤 Creator: Bumi (Agoy) - Tambun Utara     ║');
+        console.log('║  ⚡ Status : READY                          ║');
+        console.log('╚══════════════════════════════════════════════╝');
+        console.log('');
+    });
+}
+
+module.exports = app;

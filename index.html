@@ -988,6 +988,14 @@ async function fetchSongs(query, limit = 25) {
 
 async function fetchLyrics(title, artist) {
     try {
+        const res = await fetch(`${CONFIG.BACKEND_URL}/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`);
+        if (res.ok) {
+            const d = await res.json();
+            if (d.lyrics) return d.lyrics;
+        }
+    } catch (e) {}
+
+    try {
         const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 8000);
