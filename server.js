@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -13,12 +13,34 @@ app.use(express.static(__dirname));
 
 const API_PROVIDERS = [
     {
-        url: 'https://jiosaavn-api-v3.vercel.app/search',
-        param: 'query'
+        name: 'JioSaavn',
+        url: 'https://www.jiosaavn.com/api.php',
+        param: 'q',
+        extraParams: {
+            __call: 'search.getResults',
+            _format: 'json',
+            _marker: '0',
+            p: '1',
+            n: '30'
+        }
     },
     {
-        url: 'https://saavn-api-sigma.vercel.app/search',
-        param: 'query'
+        name: 'iTunes',
+        url: 'https://itunes.apple.com/search',
+        param: 'term',
+        extraParams: {
+            media: 'music',
+            country: 'ID',
+            limit: '30'
+        }
+    },
+    {
+        name: 'Deezer',
+        url: 'https://api.deezer.com/search',
+        param: 'q',
+        extraParams: {
+            limit: '30'
+        }
     }
 ];
 
@@ -163,10 +185,9 @@ function getDownloadUrls(item) {
         if (list.length > 0) return list;
     }
 
-    // 3. Fallback to vlink or media_url (with proxy to guarantee CORS playback)
-    const single = item.media_url || item.more_info?.media_url || item.more_info?.vlink || item.vlink || item.audio;
+    // 3. Fallback to iTunes previewUrl, Deezer preview, vlink, or media_url
+    const single = item.previewUrl || item.preview || item.media_url || item.more_info?.media_url || item.more_info?.vlink || item.vlink || item.audio;
     if (single && typeof single === 'string' && single.startsWith('http')) {
-        // If from jiotune (lacks Access-Control-Allow-Origin), wrap in /api/stream proxy
         const streamUrl = single.includes('jiotunepreview.jio.com')
             ? `/api/stream?url=${encodeURIComponent(single)}`
             : single;
@@ -185,13 +206,17 @@ function getDownloadUrls(item) {
 function normalizeSong(item) {
     if (!item || typeof item !== 'object') return null;
 
-    const id = item.id ? String(item.id) : (item.song_id ? String(item.song_id) : '');
-    const rawTitle = item.name || item.title || item.song || 'Unknown';
+    const id = item.id ? String(item.id) : (item.trackId ? String(item.trackId) : (item.song_id ? String(item.song_id) : String(Math.random())));
+    const rawTitle = item.name || item.title || item.song || item.trackName || 'Unknown';
     const title = decodeHTML(rawTitle);
 
     let artistName = 'Unknown';
     if (item.artists?.primary?.[0]?.name) {
         artistName = item.artists.primary[0].name;
+    } else if (item.artist?.name) {
+        artistName = item.artist.name;
+    } else if (item.artistName) {
+        artistName = item.artistName;
     } else if (item.more_info?.singers) {
         artistName = item.more_info.singers;
     } else if (item.primary_artists) {
@@ -206,7 +231,20 @@ function normalizeSong(item) {
     artistName = decodeHTML(artistName);
 
     let images = [];
-    if (Array.isArray(item.image) && item.image.length > 0) {
+    if (item.artworkUrl100) {
+        const big = item.artworkUrl100.replace(/100x100[a-z0-9\-]*\.jpg/i, '500x500bb.jpg');
+        images = [
+            { quality: '50x50', url: item.artworkUrl60 || item.artworkUrl100 },
+            { quality: '150x150', url: item.artworkUrl100 },
+            { quality: '500x500', url: big }
+        ];
+    } else if (item.album?.cover_big || item.album?.cover_medium) {
+        images = [
+            { quality: '50x50', url: item.album.cover_small || item.album.cover },
+            { quality: '150x150', url: item.album.cover_medium || item.album.cover },
+            { quality: '500x500', url: item.album.cover_big || item.album.cover_xl || item.album.cover }
+        ];
+    } else if (Array.isArray(item.image) && item.image.length > 0) {
         images = item.image.map(img => typeof img === 'string' ? { quality: '', url: img } : img);
     } else if (item.images && typeof item.images === 'object') {
         images = [
@@ -226,12 +264,14 @@ function normalizeSong(item) {
         ];
     }
 
-    const rawAlbum = typeof item.album === 'object' ? (item.album?.name || '') : (item.album || item.more_info?.album || '');
+    const rawAlbum = typeof item.album === 'object' ? (item.album?.name || item.album?.title || '') : (item.collectionName || item.album || item.more_info?.album || '');
     const albumName = decodeHTML(rawAlbum);
 
     let duration = 0;
     if (typeof item.duration === 'number') {
         duration = item.duration;
+    } else if (item.trackTimeMillis) {
+        duration = Math.round(item.trackTimeMillis / 1000);
     } else if (typeof item.duration === 'string') {
         if (item.duration.includes(':')) {
             const parts = item.duration.split(':').map(Number);
@@ -315,12 +355,13 @@ app.get('/api/search', async (req, res) => {
         console.log(`[Search] Provider ${i + 1}/${API_PROVIDERS.length} | Mencoba: ${provider.url} | Query: "${query}"`);
 
         try {
+            const params = { [provider.param]: query, ...(provider.extraParams || {}) };
             const response = await axios.get(provider.url, {
-                params: { [provider.param]: query },
+                params,
                 timeout: 8000,
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
-                    'User-Agent': 'GoyzfyMusic/8.0'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
                 },
                 validateStatus: (status) => status >= 200 && status < 300
             });
@@ -338,11 +379,21 @@ app.get('/api/search', async (req, res) => {
 
             console.log(`[Search] Berhasil dari provider: ${provider.url} (${rawList.length} hasil mentah)`);
 
-            // Dapatkan audio streaming valid via JioSaavn getDetails batch
-            const songIds = rawList.map(item => item.id).filter(Boolean);
-            if (songIds.length > 0) {
+            // Decrypt langsung jika provider sudah menyediakan encrypted_media_url
+            rawList.forEach(item => {
+                if (item.encrypted_media_url && !item.audio_direct) {
+                    const decrypted = desDecryptUrl(item.encrypted_media_url);
+                    if (decrypted && decrypted.startsWith('http')) {
+                        item.audio_direct = decrypted;
+                    }
+                }
+            });
+
+            // Dapatkan audio streaming valid via JioSaavn getDetails batch untuk yang belum punya audio
+            const missingIds = rawList.filter(item => !item.audio_direct).map(item => item.id).filter(Boolean);
+            if (missingIds.length > 0) {
                 try {
-                    const batchPids = songIds.slice(0, 20).join(',');
+                    const batchPids = missingIds.slice(0, 20).join(',');
                     const detailUrl = `https://www.jiosaavn.com/api.php?__call=song.getDetails&cc=in&_marker=0%3F_marker%3D0&_format=json&pids=${encodeURIComponent(batchPids)}`;
                     const detailRes = await axios.get(detailUrl, {
                         headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -373,8 +424,13 @@ app.get('/api/search', async (req, res) => {
                 }
             }
 
-            finalResults = rawList.map(normalizeSong).filter(Boolean);
-            break;
+            const candidateResults = rawList.map(normalizeSong).filter(s => s && s.downloadUrl && s.downloadUrl.length > 0);
+            if (candidateResults.length > 0) {
+                finalResults = candidateResults;
+                break;
+            } else {
+                console.log(`[Search] Provider ${provider.name || provider.url} tidak menghasilkan lagu dengan audio valid, mencoba provider berikutnya...`);
+            }
         } catch (err) {
             let errorReason = err.message;
             if (err.code === 'ENOTFOUND') {

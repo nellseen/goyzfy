@@ -494,7 +494,7 @@ img, video { display: block; max-width: 100%; }
     </div>
 </div>
 
-<audio id="audio-player" crossorigin="anonymous"></audio>
+<audio id="audio-player"></audio>
 
 <!-- MASCOT -->
 <div id="mascot">
@@ -828,20 +828,48 @@ async function fetchWithProxy(url) {
 }
 
 async function fetchSongs(query, limit = 25) {
+    try {
+        const res = await fetch(`${CONFIG.BACKEND_URL}/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && data.data?.results) {
+                return data.data.results.map(song => {
+                    const artistName = song.artists?.primary?.[0]?.name || song.artist || 'Unknown';
+                    const band = findBandByName(artistName);
+                    let image = song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url;
+                    if (band) image = getBandAvatar(band.id);
+                    return {
+                        id: song.id,
+                        title: song.name || song.title || 'Unknown',
+                        artist: artistName,
+                        image: image,
+                        albumCover: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url,
+                        hasBandPhoto: !!band,
+                        bandId: band ? band.id : null,
+                        audio: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[0]?.url || '',
+                        duration: song.duration || 0
+                    };
+                }).filter(s => s.audio);
+            }
+        }
+    } catch (e) {
+        console.warn('Backend search error:', e);
+    }
+
     const url = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`;
     const data = await fetchWithProxy(url);
     if (data && data.success && data.data?.results) {
         return data.data.results.map(song => {
-            const artistName = song.artists?.primary?.[0]?.name || 'Unknown';
+            const artistName = song.artists?.primary?.[0]?.name || song.artist || 'Unknown';
             const band = findBandByName(artistName);
-            let image = song.image?.[2]?.url || song.image?.[1]?.url;
+            let image = song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url;
             if (band) image = getBandAvatar(band.id);
             return {
                 id: song.id,
-                title: song.name || 'Unknown',
+                title: song.name || song.title || 'Unknown',
                 artist: artistName,
                 image: image,
-                albumCover: song.image?.[2]?.url || song.image?.[1]?.url,
+                albumCover: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url,
                 hasBandPhoto: !!band,
                 bandId: band ? band.id : null,
                 audio: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[0]?.url || '',
@@ -1054,7 +1082,20 @@ audio.addEventListener('ended', () => {
 });
 audio.addEventListener('play', () => { STATE.isPlaying = true; updatePlayButton(); });
 audio.addEventListener('pause', () => { STATE.isPlaying = false; updatePlayButton(); });
-audio.addEventListener('error', () => showToast('Gagal memuat audio', 'fa-exclamation-triangle'));
+audio.addEventListener('error', () => {
+    if (STATE.currentSong && !audio.src.includes('/api/stream') && STATE.currentSong.audio && STATE.currentSong.audio.startsWith('http')) {
+        console.warn('Direct stream error, falling back to /api/stream proxy');
+        audio.src = `/api/stream?url=${encodeURIComponent(STATE.currentSong.audio)}`;
+        audio.play().then(() => {
+            STATE.isPlaying = true;
+            updatePlayButton();
+        }).catch(() => {
+            showToast('Gagal memuat audio', 'fa-exclamation-triangle');
+        });
+    } else {
+        showToast('Gagal memuat audio', 'fa-exclamation-triangle');
+    }
+});
 $('#progress-bar').addEventListener('click', e => {
     const r = e.currentTarget.getBoundingClientRect();
     if (audio.duration) audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
@@ -1440,13 +1481,13 @@ $('#start-btn').addEventListener('click', () => {
     }, 400);
 });
 function logout() {
-    if (confirm('Kembali ke halaman profil?')) {
-        audio.pause(); audio.src = '';
-        $('#main-app').classList.remove('active');
-        $('#profile-page').style.display = 'flex';
-        $('#profile-page').style.opacity = '1';
-        STATE.currentSong = null;
-    }
+    audio.pause();
+    audio.src = '';
+    $('#main-app').classList.remove('active');
+    $('#profile-page').style.display = 'flex';
+    $('#profile-page').style.opacity = '1';
+    STATE.currentSong = null;
+    showToast('Kembali ke profil', 'fa-user');
 }
 try {
     const u = JSON.parse(localStorage.getItem('goyzfy_user'));
