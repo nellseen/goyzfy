@@ -1,0 +1,7 @@
+{
+  "name": "Goyzfy - Streaming Musik Anime Edition",
+  "description": "Streaming Musik Anime Edition - Anime and Japanese music streaming web app.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
