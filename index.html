@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0416">
+<title>Goyzfy - Streaming Musik Anime Edition</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+<style>
+:root {
+    --bg-primary: #0a0416;
+    --accent-primary: #c026d3;
+    --accent-secondary: #e879f9;
+    --cyan-primary: #22d3ee;
+    --green-primary: #1db954;
+    --green-secondary: #1ed760;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --red-primary: #ef4444;
+    --sidebar-width: 240px;
+    --player-height: 90px;
+    --radius-full: 9999px;
+    --transition: 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; line-height: 1.5; }
+button { cursor: pointer; font-family: inherit; border: none; background: none; color: inherit; font-size: inherit; outline: none; transition: var(--transition); }
+input { font-family: inherit; border: none; outline: none; background: none; color: inherit; font-size: inherit; }
+img, video { display: block; max-width: 100%; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(192,38,211,0.4); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+@keyframes twinkle { 0%,100% { opacity: 0.8; } 50% { opacity: 0.4; } }
+@keyframes floatCloud { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px) translateX(10px); } }
+@keyframes cardIn { from { opacity: 0; transform: scale(0.85) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes eq { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes typingAnim { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-7px); opacity: 1; } }
+@keyframes msgPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse-border { 0%,100% { box-shadow: 0 0 0 0 rgba(29,185,84,0.4); } 50% { box-shadow: 0 0 0 15px rgba(29,185,84,0); } }
+@keyframes glitch {
+    0% { transform: translate(0); filter: hue-rotate(0deg); }
+    20% { transform: translate(-3px, 2px); filter: hue-rotate(90deg); }
+    40% { transform: translate(3px, -2px); filter: hue-rotate(180deg); }
+    60% { transform: translate(-2px, -3px); filter: hue-rotate(270deg); }
+    80% { transform: translate(2px, 3px); filter: hue-rotate(360deg); }
+    100% { transform: translate(0); filter: hue-rotate(0deg); }
+}
+@keyframes wave-hand { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-20deg); } 75% { transform: rotate(20deg); } }
+@keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes pulse-border-anim { 0%,100% { box-shadow: 0 0 0 0 rgba(29,185,84,0.4); } 50% { box-shadow: 0 0 0 15px rgba(29,185,84,0); } }
+
+/* SPLASH */
+#splash-screen { position: fixed; inset: 0; z-index: 99999; background: #000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+#splash-screen video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
+#splash-screen .splash-overlay { position: relative; z-index: 2; text-align: center; pointer-events: none; }
+#splash-screen .splash-logo { font-size: 60px; font-weight: 900; letter-spacing: 8px; background: linear-gradient(90deg, #22d3ee, #c026d3, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: bounceIn 1s ease-out; filter: drop-shadow(0 0 20px rgba(192,38,211,0.8)); }
+#splash-screen .splash-sub { color: white; font-size: 14px; letter-spacing: 5px; margin-top: 15px; opacity: 0.8; animation: fadeIn 1.5s ease-out 0.5s backwards; }
+#splash-screen.hidden { opacity: 0; pointer-events: none; transition: opacity 0.6s; }
+
+/* BG VIDEO */
+#bg-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.35; pointer-events: none; }
+
+/* PROFILE */
+#profile-page { position: fixed; inset: 0; background: linear-gradient(135deg, #0a0416 0%, #1a0b2e 40%, #2d1b4e 70%, #0a0416 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; overflow: hidden; padding: 20px; }
+#profile-page::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 15% 25%, #fff, transparent), radial-gradient(1px 1px at 65% 70%, #fff, transparent), radial-gradient(1.5px 1.5px at 85% 15%, #22d3ee, transparent), radial-gradient(1px 1px at 35% 85%, #e879f9, transparent); background-size: 350px 350px; animation: twinkle 4s ease-in-out infinite; pointer-events: none; }
+.pixel-cloud { position: absolute; width: 10px; height: 10px; background: #a5b4fc; box-shadow: 10px 0 0 #a5b4fc, -10px 0 0 #a5b4fc, 20px 0 0 #a5b4fc, -20px 0 0 #a5b4fc, 0 -10px 0 #a5b4fc, 10px -10px 0 #a5b4fc, -10px -10px 0 #a5b4fc; opacity: 0.5; animation: floatCloud 10s ease-in-out infinite; pointer-events: none; }
+.pc1 { top: 12%; left: 8%; }
+.pc2 { top: 22%; right: 12%; transform: scale(1.4); animation-delay: -3s; }
+.pc3 { bottom: 18%; left: 15%; transform: scale(0.9); animation-delay: -6s; }
+.profile-card { position: relative; z-index: 2; background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.18); border-radius: 28px; padding: 45px 35px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 25px 70px rgba(0,0,0,0.7); animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.profile-card h1 { font-size: 34px; font-weight: 900; letter-spacing: 4px; background: linear-gradient(90deg, #22d3ee, #c026d3, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+.profile-card h2 { font-size: 22px; margin-bottom: 5px; font-weight: 600; }
+.profile-card p { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 25px; }
+.avatar-upload { position: relative; width: 110px; height: 110px; margin: 0 auto 25px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-primary); cursor: pointer; background: #222; box-shadow: 0 0 30px rgba(192,38,211,0.6); }
+.avatar-upload:hover { transform: scale(1.05); }
+.avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-upload .icon-cam { position: absolute; bottom: 2px; right: 2px; background: var(--accent-primary); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 2px solid #fff; }
+#profile-input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 15px; text-align: center; margin-bottom: 18px; }
+#profile-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 25px rgba(192,38,211,0.5); }
+#start-btn { width: 100%; padding: 15px; border-radius: 14px; background: linear-gradient(90deg, #c026d3, #e879f9); color: white; font-size: 16px; font-weight: 700; letter-spacing: 1.5px; box-shadow: 0 8px 25px rgba(192,38,211,0.5); }
+#start-btn:hover { transform: translateY(-2px); }
+
+/* MAIN APP */
+#main-app { display: none; height: 100vh; position: relative; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 1fr var(--player-height); z-index: 1; }
+#main-app.active { display: grid; }
+.sidebar { background: rgba(10,4,22,0.92); backdrop-filter: blur(15px); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid rgba(255,255,255,0.05); overflow-y: auto; z-index: 3; }
+.logo { font-size: 22px; font-weight: 900; letter-spacing: 3px; background: linear-gradient(90deg, #22d3ee, #c026d3, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; padding-left: 12px; display: flex; align-items: center; gap: 8px; }
+.logo i { font-size: 26px; }
+.nav-item { display: flex; align-items: center; gap: 14px; color: var(--text-secondary); font-size: 15px; cursor: pointer; padding: 11px 14px; border-radius: 8px; font-weight: 500; }
+.nav-item i { font-size: 17px; width: 22px; text-align: center; }
+.nav-item:hover { color: white; background: rgba(255,255,255,0.06); }
+.nav-item.active { color: white; background: rgba(192,38,211,0.15); box-shadow: inset 3px 0 0 var(--accent-primary); }
+.nav-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 10px 0; }
+.playlist-label { color: var(--text-secondary); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 8px 14px 4px; text-transform: uppercase; }
+.sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,0.06); color: var(--text-secondary); font-size: 11px; text-align: center; line-height: 1.6; }
+.main-content { padding: 20px 35px 30px; overflow-y: auto; position: relative; z-index: 2; background: linear-gradient(180deg, rgba(26,11,46,0.5) 0%, rgba(10,4,22,0.95) 400px); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; position: sticky; top: 0; z-index: 10; background: linear-gradient(180deg, rgba(10,4,22,0.95), rgba(10,4,22,0.7) 70%, transparent); backdrop-filter: blur(10px); margin: -10px -10px 25px; padding: 15px 10px; }
+.menu-btn { background: rgba(255,255,255,0.08); color: white; width: 44px; height: 44px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.1); }
+.menu-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); transform: scale(1.05); }
+.search-box { background: rgba(255,255,255,0.1); border-radius: var(--radius-full); padding: 6px 6px 6px 20px; display: flex; align-items: center; flex: 1; max-width: 550px; border: 2px solid rgba(255,255,255,0.08); }
+.search-box:focus-within { border-color: var(--accent-primary); box-shadow: 0 0 25px rgba(192,38,211,0.3); background: rgba(255,255,255,0.13); }
+.search-box > i.fa-search { color: var(--text-secondary); margin-right: 10px; font-size: 15px; }
+.search-box input { color: white; flex: 1; font-size: 14px; padding: 8px 0; }
+.search-box .clear-btn { color: var(--text-secondary); padding: 6px 10px; font-size: 14px; display: none; }
+.search-box .clear-btn.show { display: block; }
+.search-box .search-submit { background: linear-gradient(135deg, #c026d3, #e879f9); color: white; width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; flex-shrink: 0; }
+.search-box .search-submit:hover { transform: scale(1.08); }
+.user-info { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: var(--radius-full); font-size: 13px; cursor: pointer; border: 1px solid transparent; }
+.user-info:hover { background: rgba(255,255,255,0.1); border-color: rgba(192,38,211,0.3); }
+.user-info img { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--accent-primary); object-fit: cover; }
+.hamburger-menu { position: absolute; top: 70px; left: 10px; z-index: 1000; background: rgba(20,8,40,0.98); backdrop-filter: blur(25px); border: 1px solid rgba(192,38,211,0.4); border-radius: 16px; padding: 10px; min-width: 240px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); display: none; animation: slideUp 0.25s; }
+.hamburger-menu.show { display: block; }
+.hamburger-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 15px; border-radius: 10px; color: #e5e7eb; font-size: 14px; text-align: left; }
+.hamburger-menu button:hover { background: rgba(192,38,211,0.2); color: white; }
+.hamburger-menu button i { width: 20px; text-align: center; color: var(--accent-secondary); }
+.hamburger-menu .menu-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; }
+
+.hero { background: linear-gradient(135deg, rgba(192,38,211,0.3) 0%, rgba(34,211,238,0.15) 50%, rgba(232,121,249,0.2) 100%); border-radius: 20px; padding: 30px 35px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+.hero-text { position: relative; z-index: 2; }
+.hero-text h1 { font-size: 32px; font-weight: 900; background: linear-gradient(90deg, #22d3ee, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.hero-text p { color: rgba(255,255,255,0.85); font-size: 14px; max-width: 500px; }
+.hero-stats { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+.hero-stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.7); }
+.hero-stat i { color: var(--accent-secondary); }
+.section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; margin-top: 30px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.section-title > span:first-child { display: flex; align-items: center; gap: 10px; }
+.section-title .see-all { color: var(--text-secondary); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.category-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.category-pill { padding: 8px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-full); color: #e5e7eb; font-size: 12px; font-weight: 600; }
+.category-pill:hover { background: rgba(192,38,211,0.2); border-color: var(--accent-primary); transform: translateY(-2px); }
+.category-pill.active { background: linear-gradient(135deg, #c026d3, #e879f9); border-color: transparent; color: white; box-shadow: 0 5px 20px rgba(192,38,211,0.5); }
+
+.band-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.band-card { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 16px; cursor: pointer; border: 1px solid transparent; text-align: center; position: relative; transition: var(--transition); }
+.band-card:hover { background: rgba(255,255,255,0.09); border-color: rgba(192,38,211,0.5); transform: translateY(-8px); box-shadow: 0 20px 45px rgba(0,0,0,0.55), 0 0 30px rgba(192,38,211,0.2); }
+.band-card .band-img { position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; margin-bottom: 12px; background: linear-gradient(135deg, #1a0b2e, #2d1b4e); border: 3px solid rgba(192,38,211,0.4); }
+.band-card:hover .band-img { border-color: var(--accent-secondary); box-shadow: 0 0 30px rgba(232,121,249,0.5); }
+.band-card .band-img img { width: 100%; height: 100%; object-fit: cover; }
+.band-card:hover .band-img img { transform: scale(1.1); }
+.band-card .band-img .play-icon { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; opacity: 0; font-size: 32px; color: var(--green-secondary); transition: var(--transition); }
+.band-card:hover .band-img .play-icon { opacity: 1; }
+.band-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.band-card p { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.band-card .band-genre { display: inline-block; margin-top: 8px; padding: 3px 10px; background: rgba(192,38,211,0.2); color: var(--accent-secondary); border-radius: var(--radius-full); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.song-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; margin-bottom: 30px; }
+.song-card { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; cursor: pointer; border: 1px solid transparent; overflow: hidden; transition: var(--transition); }
+.song-card:hover { background: rgba(255,255,255,0.09); border-color: rgba(192,38,211,0.5); transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 30px rgba(192,38,211,0.15); }
+.song-card .img-wrap { position: relative; margin-bottom: 10px; border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: linear-gradient(135deg, #1a0b2e, #2d1b4e); }
+.song-card .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.song-card:hover .img-wrap img { transform: scale(1.08); }
+.song-card .play-overlay { position: absolute; bottom: 8px; right: 8px; width: 44px; height: 44px; background: linear-gradient(135deg, #1db954, #1ed760); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; opacity: 0; transform: translateY(15px); transition: var(--transition); box-shadow: 0 8px 20px rgba(29,185,84,0.6); font-size: 15px; }
+.song-card:hover .play-overlay { opacity: 1; transform: translateY(0); }
+.song-card h4 { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.song-card p { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-card.playing { border-color: var(--green-primary); background: rgba(29,185,84,0.08); box-shadow: 0 0 25px rgba(29,185,84,0.2); animation: pulse-border-anim 2s ease-in-out infinite; }
+.song-card.playing .play-overlay { opacity: 1; transform: translateY(0); background: linear-gradient(135deg, #c026d3, #e879f9); color: white; }
+
+.loading-state { text-align: center; padding: 40px 20px; grid-column: 1 / -1; color: var(--text-secondary); font-size: 14px; }
+.loading-state i { font-size: 28px; color: var(--accent-primary); animation: spin 1s linear infinite; margin-right: 10px; }
+.no-results { text-align: center; padding: 60px 20px; grid-column: 1 / -1; color: var(--text-secondary); }
+.no-results i { font-size: 55px; margin-bottom: 15px; color: var(--accent-primary); opacity: 0.5; }
+
+.player-bar { background: rgba(10,4,22,0.98); backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.08); grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; gap: 15px; position: relative; z-index: 100; }
+.now-playing { display: flex; align-items: center; gap: 12px; width: 30%; min-width: 0; }
+.now-playing .cover-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+.now-playing img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; background: linear-gradient(135deg, #1a0b2e, #2d1b4e); }
+.now-playing .now-playing-eq { position: absolute; inset: 0; display: none; justify-content: center; align-items: flex-end; gap: 2px; padding-bottom: 6px; background: rgba(0,0,0,0.5); border-radius: 8px; }
+.now-playing.playing .now-playing-eq { display: flex; }
+.now-playing-eq span { width: 3px; background: var(--green-primary); border-radius: 1px; animation: eq 0.9s ease-in-out infinite; }
+.now-playing-eq span:nth-child(1) { height: 30%; }
+.now-playing-eq span:nth-child(2) { height: 70%; animation-delay: 0.15s; }
+.now-playing-eq span:nth-child(3) { height: 50%; animation-delay: 0.3s; }
+.now-playing-eq span:nth-child(4) { height: 80%; animation-delay: 0.45s; }
+.now-playing-info { min-width: 0; flex: 1; }
+.now-playing-info h4 { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.now-playing-info p { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-playing .like-btn { color: var(--text-secondary); cursor: pointer; font-size: 16px; flex-shrink: 0; }
+.now-playing .like-btn:hover { color: var(--accent-secondary); }
+.now-playing .like-btn.liked { color: var(--red-primary); }
+.player-center { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 550px; }
+.player-controls { display: flex; align-items: center; gap: 20px; }
+.player-controls button { color: var(--text-secondary); font-size: 17px; padding: 5px; display: flex; align-items: center; justify-content: center; }
+.player-controls button:hover { color: white; transform: scale(1.15); }
+.player-controls button.active { color: var(--accent-secondary); }
+.player-controls .play-btn { width: 42px; height: 42px; background: white; color: #000 !important; border-radius: 50%; font-size: 16px; box-shadow: 0 5px 20px rgba(255,255,255,0.2); }
+.player-controls .play-btn:hover { transform: scale(1.1); }
+.progress-container { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.progress-container span { min-width: 35px; text-align: center; }
+.progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; position: relative; transition: height 0.2s; }
+.progress-bar:hover { height: 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan-primary), var(--accent-secondary)); border-radius: 3px; width: 0%; position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background: white; border-radius: 50%; opacity: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.progress-bar:hover .progress-fill::after { opacity: 1; }
+.player-right { display: flex; align-items: center; gap: 12px; width: 30%; justify-content: flex-end; color: var(--text-secondary); }
+.player-right i { cursor: pointer; font-size: 14px; }
+.player-right i:hover { color: white; }
+#volume-slider { width: 90px; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer; }
+#volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: white; border-radius: 50%; cursor: pointer; }
+
+#lyrics-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 5000; padding: 20px; }
+#lyrics-modal.show { display: flex; animation: fadeIn 0.3s; }
+.lyrics-content { background: linear-gradient(135deg, rgba(26,11,46,0.98), rgba(45,27,78,0.98)); border: 1px solid var(--accent-primary); border-radius: 28px; width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; animation: modalIn 0.4s; }
+.lyrics-header { padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.lyrics-header-info h3 { font-size: 17px; margin-bottom: 4px; color: var(--accent-secondary); }
+.lyrics-header-info p { font-size: 12px; color: var(--text-secondary); }
+.lyrics-header .close-lyrics { background: rgba(255,255,255,0.1); color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+.lyrics-header .close-lyrics:hover { background: var(--red-primary); transform: rotate(90deg); }
+.lyrics-body { padding: 25px; overflow-y: auto; white-space: pre-wrap; line-height: 1.9; font-size: 15px; color: #e5e7eb; flex: 1; }
+.lyrics-placeholder { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+.lyrics-placeholder i { font-size: 50px; margin-bottom: 15px; color: var(--accent-primary); opacity: 0.5; }
+.lyrics-actions { padding: 12px 25px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; justify-content: flex-end; }
+.lyrics-actions button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 16px; border-radius: var(--radius-full); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.lyrics-actions button:hover { background: var(--accent-primary); border-color: var(--accent-primary); }
+
+/* AI CHAT - tetap ada tapi tombol robot DIHILANGKAN */
+#ai-chat-window { position: fixed; bottom: calc(var(--player-height) + 100px); right: 25px; width: 380px; height: 560px; max-height: calc(100vh - var(--player-height) - 130px); background: rgba(20,8,40,0.98); backdrop-filter: blur(25px); border: 1px solid rgba(192,38,211,0.4); border-radius: 22px; z-index: 2000; display: none; flex-direction: column; box-shadow: 0 25px 70px rgba(0,0,0,0.9); overflow: hidden; }
+#ai-chat-window.show { display: flex; animation: slideUp 0.35s; }
+.ai-header { padding: 15px 18px; background: linear-gradient(135deg, rgba(192,38,211,0.35), rgba(34,211,238,0.25)); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; }
+.ai-header-info { display: flex; align-items: center; gap: 10px; }
+.ai-header-info .ai-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #c026d3, #22d3ee); display: flex; justify-content: center; align-items: center; color: white; font-size: 16px; position: relative; }
+.ai-header-info .ai-avatar::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: var(--green-primary); border-radius: 50%; border: 2px solid #140828; }
+.ai-header-info h3 { font-size: 15px; color: white; font-weight: 700; line-height: 1.2; }
+.ai-header-info small { font-size: 10px; color: rgba(255,255,255,0.6); }
+.ai-header .close-ai { color: rgba(255,255,255,0.7); font-size: 15px; padding: 6px; border-radius: 6px; }
+.ai-header .close-ai:hover { color: var(--red-primary); background: rgba(239,68,68,0.15); }
+.ai-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.message { max-width: 85%; padding: 11px 15px; border-radius: 16px; font-size: 13px; line-height: 1.55; word-wrap: break-word; animation: msgPop 0.3s; }
+.message.bot { background: rgba(255,255,255,0.08); align-self: flex-start; border-bottom-left-radius: 4px; color: #e5e7eb; border: 1px solid rgba(255,255,255,0.05); }
+.message.user { background: linear-gradient(135deg, #c026d3, #e879f9); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+.message b { color: var(--accent-secondary); font-weight: 700; }
+.typing { display: inline-flex; gap: 4px; align-items: center; }
+.typing span { width: 7px; height: 7px; background: var(--text-secondary); border-radius: 50%; animation: typingAnim 1.4s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+.quick-replies { padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid rgba(255,255,255,0.06); max-height: 110px; overflow-y: auto; background: rgba(0,0,0,0.2); }
+.quick-replies button { background: rgba(192,38,211,0.15); border: 1px solid rgba(192,38,211,0.35); color: #e5e7eb; padding: 6px 12px; border-radius: var(--radius-full); font-size: 11px; white-space: nowrap; font-weight: 500; }
+.quick-replies button:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: white; transform: translateY(-2px); }
+.ai-input { padding: 12px; display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(10,4,22,0.7); }
+.ai-input input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 11px 14px; color: white; font-size: 13px; }
+.ai-input input:focus { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(192,38,211,0.3); }
+.ai-input button { background: linear-gradient(135deg, #c026d3, #22d3ee); color: white; width: 44px; border-radius: 14px; font-size: 14px; display: flex; justify-content: center; align-items: center; }
+.ai-input button:hover { transform: scale(1.05); }
+
+.toast { position: fixed; bottom: calc(var(--player-height) + 20px); left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(20,8,40,0.98); border: 1px solid var(--accent-primary); color: white; padding: 12px 24px; border-radius: var(--radius-full); font-size: 13px; z-index: 5000; opacity: 0; transition: var(--transition); display: flex; align-items: center; gap: 10px; max-width: 90%; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast i { color: var(--accent-secondary); }
+
+.band-detail { display: none; }
+.band-detail.show { display: block; animation: fadeIn 0.4s; }
+.back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-full); color: white; font-size: 13px; margin-bottom: 15px; }
+.back-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); transform: translateX(-4px); }
+.band-header { display: flex; align-items: flex-end; gap: 25px; padding: 20px 0 30px; margin-bottom: 20px; position: relative; }
+.band-header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(192,38,211,0.3), transparent); }
+.band-header .band-photo { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent-primary); box-shadow: 0 0 40px rgba(192,38,211,0.5); flex-shrink: 0; }
+.band-header .band-photo img { width: 100%; height: 100%; object-fit: cover; }
+.band-header .band-info { flex: 1; min-width: 0; }
+.band-header .band-type { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-secondary); font-weight: 700; margin-bottom: 8px; }
+.band-header h1 { font-size: 48px; font-weight: 900; line-height: 1.1; margin-bottom: 15px; background: linear-gradient(90deg, #22d3ee, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; word-break: break-word; }
+.band-header .band-meta { display: flex; gap: 15px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
+.band-header .band-meta span { display: flex; align-items: center; gap: 6px; }
+.band-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.band-actions button { padding: 12px 24px; border-radius: var(--radius-full); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.band-actions .play-all { background: linear-gradient(135deg, #1db954, #1ed760); color: #000; box-shadow: 0 8px 25px rgba(29,185,84,0.4); }
+.band-actions .play-all:hover { transform: scale(1.05); }
+.band-actions .follow-btn { background: transparent; border: 2px solid var(--text-secondary); color: white; }
+
+#anime-theme-page { display: none; animation: fadeIn 0.4s; }
+#anime-theme-page.show { display: block; }
+.anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+.anime-card { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 15px; cursor: pointer; border: 2px solid transparent; text-align: center; transition: var(--transition); position: relative; overflow: hidden; }
+.anime-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-5px); border-color: rgba(192,38,211,0.5); }
+.anime-card.active { border-color: var(--accent-primary); box-shadow: 0 0 30px rgba(192,38,211,0.4); }
+.anime-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+.anime-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+.anime-card p { font-size: 12px; color: var(--text-secondary); }
+.anime-card .active-badge { position: absolute; top: 10px; right: 10px; background: var(--green-primary); color: #000; padding: 4px 10px; border-radius: var(--radius-full); font-size: 10px; font-weight: 700; text-transform: uppercase; display: none; }
+.anime-card.active .active-badge { display: block; }
+
+#mascot { position: fixed; bottom: calc(var(--player-height) + 20px); left: 20px; width: 130px; height: 200px; z-index: 1500; cursor: grab; user-select: none; pointer-events: auto; transition: transform 0.3s, filter 0.3s; filter: drop-shadow(0 10px 25px rgba(192,38,211,0.5)); }
+#mascot img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+#mascot.dragging { cursor: grabbing; transform: scale(1.15); filter: drop-shadow(0 15px 35px rgba(192,38,211,0.8)); }
+#mascot.idle { animation: wave-hand 1s ease-in-out infinite; }
+#mascot.glitch img { animation: glitch 0.5s; }
+#mascot.dragging img { filter: hue-rotate(45deg); }
+#mascot-bubble { position: fixed; z-index: 1600; background: rgba(20,8,40,0.98); color: white; padding: 12px 18px; border-radius: 18px; font-size: 13px; font-weight: 500; border: 2px solid var(--accent-primary); box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: none; max-width: 220px; animation: bounceIn 0.4s; pointer-events: none; }
+#mascot-bubble.show { display: block; }
+#mascot-bubble::after { content: ''; position: absolute; bottom: -10px; left: 30px; border: 10px solid transparent; border-top-color: var(--accent-primary); }
+
+@media (max-width: 900px) { :root { --sidebar-width: 200px; } .band-header h1 { font-size: 38px; } .band-header .band-photo { width: 150px; height: 150px; } }
+@media (max-width: 768px) {
+    :root { --player-height: 130px; }
+    #main-app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main-content { padding: 15px 18px 20px; }
+    .hero { padding: 22px 22px; }
+    .hero-text h1 { font-size: 24px; }
+    .search-box { max-width: 100%; }
+    .header { gap: 10px; }
+    .user-info span { display: none; }
+    .band-grid, .song-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    .band-header { flex-direction: column; align-items: center; text-align: center; gap: 15px; }
+    .band-header .band-photo { width: 140px; height: 140px; }
+    .band-header h1 { font-size: 28px; }
+    .band-meta, .band-actions { justify-content: center; }
+    .player-bar { flex-direction: column; height: auto; padding: 10px 12px; gap: 8px; }
+    .now-playing, .player-center, .player-right { width: 100%; }
+    .now-playing { justify-content: center; text-align: center; }
+    .player-right { justify-content: center; }
+    #volume-slider { display: none; }
+    #ai-chat-window { width: calc(100% - 20px); right: 10px; bottom: 80px; height: 65vh; }
+    #mascot { width: 90px; height: 140px; bottom: calc(var(--player-height) + 15px); left: 10px; }
+    #mascot-bubble { max-width: 180px; font-size: 12px; padding: 10px 14px; }
+}
+@media (max-width: 400px) { .band-grid, .song-grid { grid-template-columns: repeat(2, 1fr); } .player-controls { gap: 18px; } .band-header h1 { font-size: 22px; } }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+    <video autoplay muted loop playsinline>
+        <source src="https://u.pone.rs/woxwknun.mp4" type="video/mp4">
+    </video>
+    <div class="splash-overlay">
+        <div class="splash-logo">GOYZFY</div>
+        <div class="splash-sub">ANIME EDITION</div>
+    </div>
+</div>
+
+<!-- BG VIDEO -->
+<video id="bg-video" autoplay muted loop playsinline>
+    <source src="https://u.pone.rs/icwbxzjh.mp4" type="video/mp4">
+</video>
+
+<!-- PROFILE PAGE -->
+<div id="profile-page">
+    <div class="pixel-cloud pc1"></div>
+    <div class="pixel-cloud pc2"></div>
+    <div class="pixel-cloud pc3"></div>
+    <div class="profile-card">
+        <h1>GOYZFY</h1>
+        <h2>Buat Profil</h2>
+        <p>Isi nama dan pilih foto profil kamu</p>
+        <div class="avatar-upload" onclick="document.getElementById('file-input').click()">
+            <img id="avatar-preview" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy&backgroundColor=c026d3" alt="Avatar">
+            <div class="icon-cam"><i class="fas fa-camera"></i></div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display:none;">
+        <input type="text" id="profile-input" placeholder="Masukkan nama..." value="Bumi" maxlength="20">
+        <button id="start-btn">MULAI MAIN 🎵</button>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-headphones"></i>GOYZFY</div>
+        <div class="nav-item active" data-nav="home"><i class="fas fa-home"></i><span>Beranda</span></div>
+        <div class="nav-item" data-nav="search"><i class="fas fa-search"></i><span>Cari</span></div>
+        <div class="nav-item" data-nav="anime"><i class="fas fa-dragon"></i><span>Tema Anime</span></div>
+        <div class="nav-divider"></div>
+        <div class="playlist-label">Genre Populer</div>
+        <div class="nav-item" data-playlist="indo"><i class="fas fa-fire"></i><span>Indonesia</span></div>
+        <div class="nav-item" data-playlist="world"><i class="fas fa-globe"></i><span>Dunia</span></div>
+        <div class="nav-item" data-playlist="rock"><i class="fas fa-guitar"></i><span>Rock</span></div>
+        <div class="nav-item" data-playlist="pop"><i class="fas fa-star"></i><span>Pop</span></div>
+        <div class="nav-item" data-playlist="indie"><i class="fas fa-leaf"></i><span>Indie</span></div>
+        <div class="sidebar-footer">© 2026 Goyzfy<br>By Bumi (Agoy)<br>Tambun Utara ❤</div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <div class="hamburger-menu" id="hamburger-menu">
+            <button onclick="window.Goyzfy.openAnimeTheme()"><i class="fas fa-dragon"></i> Ganti Tema Anime</button>
+            <button onclick="window.Goyzfy.showHome()"><i class="fas fa-home"></i> Beranda</button>
+            <button onclick="window.Goyzfy.showAllBands()"><i class="fas fa-users"></i> Semua Band</button>
+            <div class="menu-divider"></div>
+            <button onclick="window.Goyzfy.logout()"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+        </div>
+
+        <div class="header">
+            <button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Cari lagu, artis, atau band..." autocomplete="off">
+                <button class="clear-btn" id="clear-search"><i class="fas fa-times"></i></button>
+                <button class="search-submit" id="search-submit"><i class="fas fa-arrow-right"></i></button>
+            </div>
+            <div class="user-info" onclick="window.Goyzfy.logout()">
+                <span id="user-name-display">Bumi</span>
+                <img id="user-avatar-display" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy" alt="User">
+            </div>
+        </div>
+
+        <div id="home-view">
+            <div class="hero">
+                <div class="hero-text">
+                    <h1>🎸 Pilih Band Favoritmu</h1>
+                    <p>Klik foto band untuk langsung memutar lagu mereka. Ribuan lagu gratis!</p>
+                    <div class="hero-stats">
+                        <div class="hero-stat"><i class="fas fa-users"></i> <span id="total-bands">50+ Band</span></div>
+                        <div class="hero-stat"><i class="fas fa-music"></i> <span id="total-songs">Memuat...</span></div>
+                        <div class="hero-stat"><i class="fas fa-headphones"></i> HD 320kbps</div>
+                        <div class="hero-stat"><i class="fas fa-infinity"></i> Tanpa batas</div>
+                    </div>
+                </div>
+            </div>
+            <div class="category-pills" id="category-pills">
+                <button class="category-pill active" data-cat="all">🎵 Semua</button>
+                <button class="category-pill" data-cat="indo">🇮🇩 Indonesia</button>
+                <button class="category-pill" data-cat="world">🌍 Dunia</button>
+                <button class="category-pill" data-cat="rock">🎸 Rock</button>
+                <button class="category-pill" data-cat="pop">⭐ Pop</button>
+                <button class="category-pill" data-cat="indie">🌿 Indie</button>
+            </div>
+            <div class="section-title">
+                <span>🎸 Band & Artis</span>
+                <button class="see-all" onclick="window.Goyzfy.showAllBands()">Lihat semua</button>
+            </div>
+            <div class="band-grid" id="band-grid">
+                <div class="loading-state"><i class="fas fa-spinner"></i> Memuat band...</div>
+            </div>
+        </div>
+
+        <div id="band-detail-view" class="band-detail">
+            <button class="back-btn" onclick="window.Goyzfy.showHome()"><i class="fas fa-arrow-left"></i> Kembali</button>
+            <div class="band-header" id="band-header"></div>
+            <div class="section-title"><span id="band-songs-title">🎵 Semua Lagu</span></div>
+            <div class="song-grid" id="band-songs-grid">
+                <div class="loading-state"><i class="fas fa-spinner"></i> Memuat lagu...</div>
+            </div>
+        </div>
+
+        <div id="search-view" style="display:none;">
+            <div class="section-title">
+                <span id="search-title">🔍 Hasil Pencarian</span>
+                <button class="see-all" onclick="window.Goyzfy.showHome()"><i class="fas fa-arrow-left"></i> Kembali</button>
+            </div>
+            <div class="song-grid" id="search-grid"></div>
+        </div>
+
+        <div id="anime-theme-page">
+            <div class="section-title">
+                <span>🎨 Ganti Tema Anime</span>
+                <button class="see-all" onclick="window.Goyzfy.showHome()"><i class="fas fa-arrow-left"></i> Kembali</button>
+            </div>
+            <p style="color:var(--text-secondary); margin-bottom:15px;">Pilih karakter anime untuk mengubah maskot dan tema aplikasi.</p>
+            <div class="anime-grid" id="anime-grid"></div>
+        </div>
+    </main>
+
+    <div class="player-bar">
+        <div class="now-playing" id="now-playing">
+            <div class="cover-wrap">
+                <img id="player-img" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy" alt="Cover">
+                <div class="now-playing-eq"><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="now-playing-info">
+                <h4 id="player-title">Belum ada lagu</h4>
+                <p id="player-artist">Pilih lagu untuk diputar</p>
+            </div>
+            <i class="far fa-heart like-btn" id="like-btn"></i>
+        </div>
+        <div class="player-center">
+            <div class="player-controls">
+                <button id="shuffle-btn"><i class="fas fa-random"></i></button>
+                <button id="prev-btn"><i class="fas fa-step-backward"></i></button>
+                <button class="play-btn" id="play-btn"><i class="fas fa-play"></i></button>
+                <button id="next-btn"><i class="fas fa-step-forward"></i></button>
+                <button id="repeat-btn"><i class="fas fa-redo"></i></button>
+            </div>
+            <div class="progress-container">
+                <span id="current-time">0:00</span>
+                <div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <span id="total-time">0:00</span>
+            </div>
+        </div>
+        <div class="player-right">
+            <i class="fas fa-microphone-lines" id="lyrics-btn"></i>
+            <i class="fas fa-volume-up" id="volume-icon"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="80">
+        </div>
+    </div>
+</div>
+
+<audio id="audio-player" crossorigin="anonymous"></audio>
+
+<!-- MASCOT -->
+<div id="mascot">
+    <img id="mascot-img" src="https://u.pone.rs/dlrgraia.jpg" alt="Mascot">
+</div>
+<div id="mascot-bubble"></div>
+
+<!-- LYRICS MODAL -->
+<div id="lyrics-modal">
+    <div class="lyrics-content">
+        <div class="lyrics-header">
+            <div class="lyrics-header-info">
+                <h3 id="lyrics-title">Lirik Lagu</h3>
+                <p id="lyrics-artist">Artis</p>
+            </div>
+            <button class="close-lyrics" onclick="window.Goyzfy.closeLyrics()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="lyrics-body" id="lyrics-body">
+            <div class="lyrics-placeholder"><i class="fas fa-music"></i><p>Pilih lagu untuk melihat liriknya</p></div>
+        </div>
+        <div class="lyrics-actions">
+            <button onclick="window.Goyzfy.copyLyrics()"><i class="fas fa-copy"></i> Salin</button>
+            <button onclick="window.Goyzfy.closeLyrics()"><i class="fas fa-check"></i> Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI CHAT (tanpa tombol robot) -->
+<div id="ai-chat-window">
+    <div class="ai-header" id="ai-drag-header">
+        <div class="ai-header-info">
+            <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+            <div><h3>Goyzfy AI</h3><small>Online • Siap membantu</small></div>
+        </div>
+        <button class="close-ai" id="close-ai"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-messages" id="ai-messages">
+        <div class="message bot">Halo! Saya <b>Goyzfy AI</b> 🎵<br>Tanyakan apa saja tentang musik!<br><br><i>Tips: Klik maskot untuk buka chat ini lagi</i></div>
+    </div>
+    <div class="quick-replies">
+        <button data-q="Siapa yang membuat GOYZFY?">Pembuat GOYZFY?</button>
+        <button data-q="Siapa band dari lagu Jendela Kelas 1?">Band Jendela Kelas 1</button>
+        <button data-q="Siapa penyanyi lagu Kangen?">Penyanyi Kangen</button>
+        <button data-q="Info Iwan Fals">Info Iwan Fals</button>
+        <button data-q="Info Sheila On 7">Info Sheila On 7</button>
+        <button data-q="Rekomendasi lagu">Rekomendasi</button>
+    </div>
+    <div class="ai-input">
+        <input type="text" id="ai-input-field" placeholder="Tanya apa saja..." autocomplete="off">
+        <button id="send-ai-btn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i><span id="toast-text">Pesan</span></div>
+
+<script>
+(function() {
+'use strict';
+
+// ============ CONFIG ============
+const CONFIG = {
+    VERSION: '8.0',
+    CREATOR: 'Bumi (Agoy)',
+    LOCATION: 'Tambun Utara',
+    DEFAULT_VOLUME: 0.8,
+    SEARCH_DEBOUNCE: 500,
+    BACKEND_URL: '/api',
+    CORS_PROXIES: [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?url=',
+        'https://api.codetabs.com/v1/proxy?quest='
+    ],
+    IDLE_TIMEOUT: 3000,
+    BUBBLE_DURATION: 2000
+};
+
+// ============ ANIME THEMES ============
+const ANIME_THEMES = [
+    { id: 'ryo', name: 'Ryo Yamada', desc: 'Bocchi the Rock! - Bassist Pink',
+      image: 'https://u.pone.rs/dlrgraia.jpg', idleImage: 'https://u.pone.rs/qncspevs.jpg',
+      pulledImage: 'https://u.pone.rs/sfusapkb.jpg', clickedImage: 'https://u.pone.rs/dtgbxtht.jpg',
+      placedImage: 'https://u.pone.rs/ehrentcn.jpg',
+      colors: { primary: '#ec4899', secondary: '#f472b6' } },
+    { id: 'qin', name: 'Qin Shi Huang', desc: 'Record of Ragnarok - Emperor',
+      image: 'https://u.pone.rs/dlrgraia.jpg', idleImage: 'https://u.pone.rs/qncspevs.jpg',
+      pulledImage: 'https://u.pone.rs/sfusapkb.jpg', clickedImage: 'https://u.pone.rs/dtgbxtht.jpg',
+      placedImage: 'https://u.pone.rs/ehrentcn.jpg',
+      colors: { primary: '#dc2626', secondary: '#fbbf24' } }
+];
+
+// ============ BAND SVG GENERATOR ============
+function makeBandSVG(shortName, color1, color2, color3, icon, pattern) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+<defs>
+<linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="${color1}"/>
+<stop offset="50%" stop-color="${color2}"/>
+<stop offset="100%" stop-color="${color3}"/>
+</linearGradient>
+<radialGradient id="g2" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="rgba(255,255,255,0.5)"/>
+<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+</radialGradient>
+<pattern id="p1" width="40" height="40" patternUnits="userSpaceOnUse">
+<circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/>
+<circle cx="0" cy="0" r="1.5" fill="rgba(255,255,255,0.06)"/>
+<circle cx="40" cy="40" r="1.5" fill="rgba(255,255,255,0.06)"/>
+</pattern>
+<pattern id="p2" width="80" height="80" patternUnits="userSpaceOnUse">
+<path d="M0 40 Q20 20 40 40 T80 40" stroke="rgba(255,255,255,0.08)" fill="none" stroke-width="1.5"/>
+</pattern>
+<filter id="blur"><feGaussianBlur stdDeviation="10"/></filter>
+<filter id="glow2"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="500" height="500" fill="url(#g1)"/>
+<rect width="500" height="500" fill="url(#p1)"/>
+<rect width="500" height="500" fill="url(#p2)"/>
+<circle cx="250" cy="250" r="200" fill="url(#g2)" filter="url(#blur)" opacity="0.6"/>
+<circle cx="250" cy="250" r="180" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+<circle cx="250" cy="250" r="155" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+<circle cx="250" cy="250" r="130" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+<circle cx="250" cy="250" r="105" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+<circle cx="250" cy="250" r="80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+<text x="250" y="230" font-family="Arial Black,Impact,sans-serif" font-size="140" text-anchor="middle" font-weight="900" fill="rgba(255,255,255,0.15)" filter="url(#glow2)">${icon}</text>
+<text x="250" y="340" font-family="Arial Black,Impact,sans-serif" font-size="72" fill="white" text-anchor="middle" font-weight="900" letter-spacing="2" filter="url(#glow2)">${shortName}</text>
+<text x="250" y="380" font-family="Arial,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)" text-anchor="middle" letter-spacing="8">GOYZFY</text>
+<text x="250" y="405" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle" letter-spacing="5">${pattern}</text>
+<circle cx="80" cy="80" r="6" fill="rgba(255,255,255,0.35)"/>
+<circle cx="420" cy="100" r="5" fill="rgba(255,255,255,0.3)"/>
+<circle cx="100" cy="420" r="5" fill="rgba(255,255,255,0.3)"/>
+<circle cx="410" cy="400" r="6" fill="rgba(255,255,255,0.35)"/>
+</svg>`;
+    try { return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))); }
+    catch (e) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); }
+}
+
+// ============ BAND DATABASE ============
+const BANDS = [
+    { id: 'iwanfals', name: 'Iwan Fals', short: 'IWAN', genre: 'Pop Rock', country: 'Indonesia', year: 1961, icon: '🎤', color1: '#dc2626', color2: '#f59e0b', color3: '#7c2d12', pattern: 'LEGENDA', query: 'Iwan Fals', songs: ['Jendela Kelas 1', 'Bento', 'Ibu', 'Wakil Rakyat'] },
+    { id: 'sheilaon7', name: 'Sheila On 7', short: 'SO7', genre: 'Pop Rock', country: 'Indonesia', year: 1996, icon: '🎸', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'YOGYAKARTA', query: 'Sheila On 7', songs: ['Dan', 'Kita', 'Sephia'] },
+    { id: 'dewa19', name: 'Dewa 19', short: 'DEWA19', genre: 'Rock', country: 'Indonesia', year: 1986, icon: '🎸', color1: '#0891b2', color2: '#7c3aed', color3: '#164e63', pattern: 'SURABAYA', query: 'Dewa 19', songs: ['Kangen', 'Pupus', 'Separuh Nafas'] },
+    { id: 'noah', name: 'Noah', short: 'NOAH', genre: 'Pop Rock', country: 'Indonesia', year: 2000, icon: '🎸', color1: '#2563eb', color2: '#06b6d4', color3: '#1e3a8a', pattern: 'BANDUNG', query: 'Noah', songs: ['Separuh Aku', 'Mungkin Nanti'] },
+    { id: 'peterpan', name: 'Peterpan', short: 'PETERPAN', genre: 'Pop Rock', country: 'Indonesia', year: 2000, icon: '🎸', color1: '#059669', color2: '#10b981', color3: '#064e3b', pattern: 'CLASSIC', query: 'Peterpan', songs: ['Mungkin Nanti', 'Bintang di Surga'] },
+    { id: 'tulus', name: 'Tulus', short: 'TULUS', genre: 'Pop / Jazz', country: 'Indonesia', year: 1987, icon: '🎤', color1: '#1e40af', color2: '#0891b2', color3: '#0c4a6e', pattern: 'SUARA EMAS', query: 'Tulus', songs: ['Monokrom', 'Pamit', 'Hati-Hati di Jalan'] },
+    { id: 'pamungkas', name: 'Pamungkas', short: 'PAMUNGKAS', genre: 'Indie Pop', country: 'Indonesia', year: 1993, icon: '🎸', color1: '#be185d', color2: '#f59e0b', color3: '#7c2d12', pattern: 'INDIE', query: 'Pamungkas', songs: ['To the Bone', 'Kenangan Manis'] },
+    { id: 'fourtwnty', name: 'Fourtwnty', short: 'FOURTWNTY', genre: 'Indie Folk', country: 'Indonesia', year: 2010, icon: '🌿', color1: '#15803d', color2: '#84cc16', color3: '#14532d', pattern: 'FOLK', query: 'Fourtwnty', songs: ['Zona Nyaman', 'Fana Merah Jambu'] },
+    { id: 'payungteduh', name: 'Payung Teduh', short: 'PAYUNG', genre: 'Indie Folk', country: 'Indonesia', year: 2007, icon: '☂️', color1: '#0d9488', color2: '#059669', color3: '#134e4a', pattern: 'AKUSTIK', query: 'Payung Teduh', songs: ['Akad', 'Resah'] },
+    { id: 'raisa', name: 'Raisa', short: 'RAISA', genre: 'Pop', country: 'Indonesia', year: 1990, icon: '🎤', color1: '#be123c', color2: '#ec4899', color3: '#831843', pattern: 'DIVA POP', query: 'Raisa', songs: ['Could Have Been', 'Serba Salah'] },
+    { id: 'andmesh', name: 'Andmesh', short: 'ANDMESH', genre: 'Pop', country: 'Indonesia', year: 1997, icon: '🎤', color1: '#7c2d12', color2: '#ea580c', color3: '#431407', pattern: 'SUARA KHAS', query: 'Andmesh', songs: ['Hanya Rindu'] },
+    { id: 'armada', name: 'Armada', short: 'ARMADA', genre: 'Pop', country: 'Indonesia', year: 2007, icon: '🎸', color1: '#4338ca', color2: '#7c3aed', color3: '#1e1b4b', pattern: 'POP ROCK', query: 'Armada', songs: ['Asal Kau Bahagia'] },
+    { id: 'ungu', name: 'Ungu', short: 'UNGU', genre: 'Pop Rock', country: 'Indonesia', year: 1996, icon: '🎸', color1: '#7e22ce', color2: '#a855f7', color3: '#581c87', pattern: 'PURPLE', query: 'Ungu', songs: ['Kekasih Gelapku', 'Demi Waktu'] },
+    { id: 'padi', name: 'Padi', short: 'PADI', genre: 'Pop Rock', country: 'Indonesia', year: 1997, icon: '🎸', color1: '#166534', color2: '#22c55e', color3: '#14532d', pattern: 'POP ROCK', query: 'Padi', songs: ['Kasih Tak Sampai'] },
+    { id: 'radja', name: 'Radja', short: 'RADJA', genre: 'Pop Rock', country: 'Indonesia', year: 2001, icon: '🎸', color1: '#c2410c', color2: '#f97316', color3: '#7c2d12', pattern: 'BAND POP', query: 'Radja', songs: ['Jujur', 'Tulus'] },
+    { id: 'virgoun', name: 'Virgoun', short: 'VIRGOUN', genre: 'Pop', country: 'Indonesia', year: 1986, icon: '🎤', color1: '#0e7490', color2: '#06b6d4', color3: '#164e63', pattern: 'LAST CHILD', query: 'Virgoun', songs: ['Surat Cinta Untuk Starla', 'Bukti'] },
+    { id: 'judika', name: 'Judika', short: 'JUDIKA', genre: 'Pop', country: 'Indonesia', year: 1978, icon: '🎤', color1: '#831843', color2: '#ec4899', color3: '#500724', pattern: 'POWER', query: 'Judika', songs: ['Bukan Dia Tapi Aku'] },
+    { id: 'rossa', name: 'Rossa', short: 'ROSSA', genre: 'Pop', country: 'Indonesia', year: 1978, icon: '🎤', color1: '#7e1d3f', color2: '#db2777', color3: '#4c0519', pattern: 'DIVA', query: 'Rossa', songs: ['Hati Yang Kau Sakiti'] },
+    { id: 'glennfredly', name: 'Glenn Fredly', short: 'GLENN', genre: 'Pop / R&B', country: 'Indonesia', year: 1975, icon: '🎤', color1: '#1e3a8a', color2: '#0ea5e9', color3: '#172554', pattern: 'R&B LEGEND', query: 'Glenn Fredly', songs: ['Januari'] },
+    { id: 'feast', name: '.Feast', short: '.FEAST', genre: 'Indie Rock', country: 'Indonesia', year: 2012, icon: '🔥', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'INDIE ROCK', query: '.Feast', songs: ['Gugur Bunga', 'Peradaban'] },
+    { id: 'efekrumahkaca', name: 'Efek Rumah Kaca', short: 'ERK', genre: 'Indie Rock', country: 'Indonesia', year: 2001, icon: '🏠', color1: '#0f766e', color2: '#14b8a6', color3: '#134e4a', pattern: 'ART ROCK', query: 'Efek Rumah Kaca', songs: ['Cinta Melulu'] },
+    { id: 'hindia', name: 'Hindia', short: 'HINDIA', genre: 'Indie Pop', country: 'Indonesia', year: 2018, icon: '🌊', color1: '#0369a1', color2: '#38bdf8', color3: '#075985', pattern: 'INDIE POP', query: 'Hindia', songs: ['Evaluasi'] },
+    { id: 'juicyluicy', name: 'Juicy Luicy', short: 'JUICY', genre: 'Pop', country: 'Indonesia', year: 2015, icon: '🍊', color1: '#c2410c', color2: '#fb923c', color3: '#7c2d12', pattern: 'POP MANIS', query: 'Juicy Luicy', songs: ['Lantas', 'Halu'] },
+    { id: 'nadinamizah', name: 'Nadin Amizah', short: 'NADIN', genre: 'Folk Pop', country: 'Indonesia', year: 2000, icon: '🌸', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'FOLK POP', query: 'Nadin Amizah', songs: ['Bertaut'] },
+    { id: 'mahalini', name: 'Mahalini', short: 'MAHALINI', genre: 'Pop', country: 'Indonesia', year: 2000, icon: '🎤', color1: '#7c3aed', color2: '#c084fc', color3: '#4c1d95', pattern: 'POP BALI', query: 'Mahalini', songs: ['Sial'] },
+    { id: 'lyodra', name: 'Lyodra', short: 'LYODRA', genre: 'Pop', country: 'Indonesia', year: 2003, icon: '🎤', color1: '#9d174d', color2: '#f472b6', color3: '#500724', pattern: 'DIVA MUDA', query: 'Lyodra', songs: ['Pesan Terakhir'] },
+    { id: 'coldplay', name: 'Coldplay', short: 'COLDPLAY', genre: 'Alt Rock', country: 'UK', year: 1996, icon: '🌟', color1: '#1e40af', color2: '#fbbf24', color3: '#172554', pattern: 'LONDON', query: 'Coldplay', songs: ['Yellow', 'Fix You', 'Viva la Vida'] },
+    { id: 'linkinpark', name: 'Linkin Park', short: 'LP', genre: 'Nu Metal', country: 'USA', year: 1996, icon: '🔥', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'NU METAL', query: 'Linkin Park', songs: ['Numb', 'In the End'] },
+    { id: 'brunomars', name: 'Bruno Mars', short: 'BRUNO', genre: 'Pop R&B', country: 'USA', year: 1985, icon: '🎤', color1: '#b91c1c', color2: '#f59e0b', color3: '#7c2d12', pattern: 'POP STAR', query: 'Bruno Mars', songs: ['Just the Way You Are', 'Grenade'] },
+    { id: 'edsheeran', name: 'Ed Sheeran', short: 'ED', genre: 'Pop Folk', country: 'UK', year: 1991, icon: '🎸', color1: '#ea580c', color2: '#fbbf24', color3: '#7c2d12', pattern: 'FOLK POP', query: 'Ed Sheeran', songs: ['Shape of You', 'Perfect'] },
+    { id: 'taylorswift', name: 'Taylor Swift', short: 'TAYLOR', genre: 'Pop', country: 'USA', year: 1989, icon: '✨', color1: '#9333ea', color2: '#f472b6', color3: '#4c1d95', pattern: 'POP QUEEN', query: 'Taylor Swift', songs: ['Love Story', 'Shake It Off'] },
+    { id: 'adele', name: 'Adele', short: 'ADELE', genre: 'Soul Pop', country: 'UK', year: 1988, icon: '🎤', color1: '#7c2d12', color2: '#f59e0b', color3: '#450a0a', pattern: 'SOUL VOICE', query: 'Adele', songs: ['Rolling in the Deep', 'Hello'] },
+    { id: 'queen', name: 'Queen', short: 'QUEEN', genre: 'Classic Rock', country: 'UK', year: 1970, icon: '👑', color1: '#7c3aed', color2: '#fbbf24', color3: '#4c1d95', pattern: 'LEGEND', query: 'Queen', songs: ['Bohemian Rhapsody', 'We Will Rock You'] },
+    { id: 'maroon5', name: 'Maroon 5', short: 'M5', genre: 'Pop Rock', country: 'USA', year: 1994, icon: '🎸', color1: '#be123c', color2: '#f97316', color3: '#831843', pattern: 'POP ROCK', query: 'Maroon 5', songs: ['Sugar', 'Memories'] },
+    { id: 'imaginedragons', name: 'Imagine Dragons', short: 'ID', genre: 'Alt Rock', country: 'USA', year: 2008, icon: '🐉', color1: '#991b1b', color2: '#dc2626', color3: '#450a0a', pattern: 'ALT ROCK', query: 'Imagine Dragons', songs: ['Believer', 'Thunder'] },
+    { id: 'theweeknd', name: 'The Weeknd', short: 'WEEKND', genre: 'R&B Pop', country: 'Canada', year: 1990, icon: '🌙', color1: '#831843', color2: '#db2777', color3: '#500724', pattern: 'R&B POP', query: 'The Weeknd', songs: ['Blinding Lights'] },
+    { id: 'billieeilish', name: 'Billie Eilish', short: 'BILLIE', genre: 'Alt Pop', country: 'USA', year: 2001, icon: '💚', color1: '#166534', color2: '#84cc16', color3: '#14532d', pattern: 'ALT POP', query: 'Billie Eilish', songs: ['Bad Guy'] },
+    { id: 'arianagrande', name: 'Ariana Grande', short: 'ARIANA', genre: 'Pop', country: 'USA', year: 1993, icon: '🎤', color1: '#7e22ce', color2: '#c084fc', color3: '#581c87', pattern: 'POP STAR', query: 'Ariana Grande', songs: ['7 Rings'] },
+    { id: 'justinbieber', name: 'Justin Bieber', short: 'JB', genre: 'Pop', country: 'Canada', year: 1994, icon: '🎤', color1: '#0369a1', color2: '#38bdf8', color3: '#0c4a6e', pattern: 'POP STAR', query: 'Justin Bieber', songs: ['Baby', 'Sorry'] },
+    { id: 'dualipa', name: 'Dua Lipa', short: 'DUA', genre: 'Pop Disco', country: 'UK', year: 1995, icon: '💃', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'DISCO POP', query: 'Dua Lipa', songs: ['New Rules'] },
+    { id: 'eminem', name: 'Eminem', short: 'EMINEM', genre: 'Hip Hop', country: 'USA', year: 1972, icon: '🎤', color1: '#1e293b', color2: '#334155', color3: '#0f172a', pattern: 'RAP GOD', query: 'Eminem', songs: ['Lose Yourself'] },
+    { id: 'michaeljackson', name: 'Michael Jackson', short: 'MJ', genre: 'Pop Soul', country: 'USA', year: 1958, icon: '👑', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'KING', query: 'Michael Jackson', songs: ['Billie Jean', 'Thriller'] },
+    { id: 'thebeatles', name: 'The Beatles', short: 'BEATLES', genre: 'Classic Rock', country: 'UK', year: 1960, icon: '🎸', color1: '#1e40af', color2: '#dc2626', color3: '#172554', pattern: 'LIVERPOOL', query: 'The Beatles', songs: ['Hey Jude', 'Let It Be'] },
+    { id: 'nirvana', name: 'Nirvana', short: 'NIRVANA', genre: 'Grunge', country: 'USA', year: 1987, icon: '🎸', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'GRUNGE', query: 'Nirvana', songs: ['Smells Like Teen Spirit'] },
+    { id: 'metallica', name: 'Metallica', short: 'METALLICA', genre: 'Metal', country: 'USA', year: 1981, icon: '🎸', color1: '#1e293b', color2: '#dc2626', color3: '#0f172a', pattern: 'METAL', query: 'Metallica', songs: ['Nothing Else Matters'] },
+    { id: 'gunsnroses', name: "Guns N' Roses", short: 'GNR', genre: 'Hard Rock', country: 'USA', year: 1985, icon: '🌹', color1: '#991b1b', color2: '#f59e0b', color3: '#450a0a', pattern: 'HARD ROCK', query: 'Guns N Roses', songs: ["Sweet Child O' Mine"] },
+    { id: 'acdc', name: 'AC/DC', short: 'ACDC', genre: 'Hard Rock', country: 'Australia', year: 1973, icon: '⚡', color1: '#7f1d1d', color2: '#fbbf24', color3: '#450a0a', pattern: 'HARD ROCK', query: 'ACDC', songs: ['Back in Black'] },
+    { id: 'bts', name: 'BTS', short: 'BTS', genre: 'K-Pop', country: 'Korea', year: 2013, icon: '💜', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'K-POP', query: 'BTS', songs: ['Dynamite', 'Butter'] },
+    { id: 'blackpink', name: 'BLACKPINK', short: 'BPINK', genre: 'K-Pop', country: 'Korea', year: 2016, icon: '🖤', color1: '#be185d', color2: '#1e293b', color3: '#831843', pattern: 'K-POP', query: 'BLACKPINK', songs: ['How You Like That'] }
+];
+
+const BAND_AVATARS = {};
+BANDS.forEach(b => { BAND_AVATARS[b.id] = makeBandSVG(b.short, b.color1, b.color2, b.color3, b.icon, b.pattern); });
+
+const SONG_DATABASE = {
+    'jendela kelas 1': { band: 'Iwan Fals', singer: 'Iwan Fals', year: 1981, album: 'Sarjana Muda' },
+    'bento': { band: 'Iwan Fals', singer: 'Iwan Fals', year: 1985, album: 'Ethiopia' },
+    'ibu': { band: 'Iwan Fals', singer: 'Iwan Fals', year: 1989, album: 'Swa Swara' },
+    'wakil rakyat': { band: 'Iwan Fals', singer: 'Iwan Fals', year: 1987, album: 'Sarjana Muda' },
+    'dan': { band: 'Sheila On 7', singer: 'Duta', year: 1999, album: 'Sheila On 7' },
+    'kita': { band: 'Sheila On 7', singer: 'Duta', year: 2000, album: 'Kisah Klasik' },
+    'sephia': { band: 'Sheila On 7', singer: 'Duta', year: 2000, album: 'Kisah Klasik' },
+    'kangen': { band: 'Dewa 19', singer: 'Once Mekel / Ari Lasso', year: 1992, album: 'Dewa 19' },
+    'pupus': { band: 'Dewa 19', singer: 'Once Mekel', year: 2000, album: 'Bintang Lima' },
+    'separuh nafas': { band: 'Dewa 19', singer: 'Once Mekel', year: 2000, album: 'Bintang Lima' },
+    'mungkin nanti': { band: 'Peterpan / Noah', singer: 'Ariel Noah', year: 2004, album: 'Bintang di Surga' },
+    'bintang di surga': { band: 'Peterpan / Noah', singer: 'Ariel Noah', year: 2004, album: 'Bintang di Surga' },
+    'separuh aku': { band: 'Noah', singer: 'Ariel Noah', year: 2012, album: 'Seperti Seharusnya' },
+    'monokrom': { band: 'Tulus', singer: 'Tulus', year: 2016, album: 'Monokrom' },
+    'pamit': { band: 'Tulus', singer: 'Tulus', year: 2018, album: 'Monokrom' },
+    'hati-hati di jalan': { band: 'Tulus', singer: 'Tulus', year: 2014, album: 'Gajah' },
+    'to the bone': { band: 'Pamungkas', singer: 'Pamungkas', year: 2020, album: 'Solipsism' },
+    'kenangan manis': { band: 'Pamungkas', singer: 'Pamungkas', year: 2018, album: 'Walk the Talk' },
+    'zona nyaman': { band: 'Fourtwnty', singer: 'Ari Lesmana', year: 2015, album: 'Lelaku' },
+    'akad': { band: 'Payung Teduh', singer: 'Is', year: 2014, album: 'Dunia Batas' },
+    'could have been': { band: 'Raisa', singer: 'Raisa', year: 2011, album: 'Raisa' },
+    'hanya rindu': { band: 'Andmesh', singer: 'Andmesh', year: 2019, album: 'Andmesh' },
+    'asal kau bahagia': { band: 'Armada', singer: 'Rizal', year: 2017, album: 'Maju Terus' },
+    'kekasih gelapku': { band: 'Ungu', singer: 'Pasha', year: 2002, album: 'Laguku' },
+    'kasih tak sampai': { band: 'Padi', singer: 'Fadly', year: 1999, album: 'Lain Dunia' },
+    'jujur': { band: 'Radja', singer: 'Ian Kasela', year: 2007, album: 'Jujur' },
+    'surat cinta untuk starla': { band: 'Virgoun', singer: 'Virgoun', year: 2017, album: 'Virgoun' },
+    'bukan dia tapi aku': { band: 'Judika', singer: 'Judika', year: 2017, album: 'Judika' },
+    'hati yang kau sakiti': { band: 'Rossa', singer: 'Rossa', year: 2009, album: 'Rossa' },
+    'januari': { band: 'Glenn Fredly', singer: 'Glenn Fredly', year: 2003, album: 'Selamat Pagi, Dunia!' },
+    'gugur bunga': { band: '.Feast', singer: 'Baskara Putra', year: 2019, album: 'Beberapa Orang Memaafkan' },
+    'yellow': { band: 'Coldplay', singer: 'Chris Martin', year: 2000, album: 'Parachutes' },
+    'fix you': { band: 'Coldplay', singer: 'Chris Martin', year: 2005, album: 'X&Y' },
+    'viva la vida': { band: 'Coldplay', singer: 'Chris Martin', year: 2008, album: 'Viva la Vida' },
+    'numb': { band: 'Linkin Park', singer: 'Chester Bennington', year: 2003, album: 'Meteora' },
+    'in the end': { band: 'Linkin Park', singer: 'Chester Bennington', year: 2000, album: 'Hybrid Theory' },
+    'shape of you': { band: 'Ed Sheeran', singer: 'Ed Sheeran', year: 2017, album: 'Divide' },
+    'perfect': { band: 'Ed Sheeran', singer: 'Ed Sheeran', year: 2017, album: 'Divide' },
+    'love story': { band: 'Taylor Swift', singer: 'Taylor Swift', year: 2008, album: 'Fearless' },
+    'shake it off': { band: 'Taylor Swift', singer: 'Taylor Swift', year: 2014, album: '1989' },
+    'rolling in the deep': { band: 'Adele', singer: 'Adele', year: 2010, album: '21' },
+    'someone like you': { band: 'Adele', singer: 'Adele', year: 2011, album: '21' },
+    'hello': { band: 'Adele', singer: 'Adele', year: 2015, album: '25' },
+    'bohemian rhapsody': { band: 'Queen', singer: 'Freddie Mercury', year: 1975, album: 'A Night at the Opera' },
+    'we will rock you': { band: 'Queen', singer: 'Freddie Mercury', year: 1977, album: 'News of the World' },
+    'sugar': { band: 'Maroon 5', singer: 'Adam Levine', year: 2014, album: 'V' },
+    'memories': { band: 'Maroon 5', singer: 'Adam Levine', year: 2019, album: 'Jordi' },
+    'believer': { band: 'Imagine Dragons', singer: 'Dan Reynolds', year: 2017, album: 'Evolve' },
+    'thunder': { band: 'Imagine Dragons', singer: 'Dan Reynolds', year: 2017, album: 'Evolve' },
+    'blinding lights': { band: 'The Weeknd', singer: 'The Weeknd', year: 2019, album: 'After Hours' },
+    'bad guy': { band: 'Billie Eilish', singer: 'Billie Eilish', year: 2019, album: 'When We All Fall Asleep' },
+    'dynamite': { band: 'BTS', singer: 'BTS', year: 2020, album: 'Dynamite' },
+    'butter': { band: 'BTS', singer: 'BTS', year: 2021, album: 'Butter' },
+    'how you like that': { band: 'BLACKPINK', singer: 'BLACKPINK', year: 2020, album: 'The Album' },
+    'sial': { band: 'Mahalini', singer: 'Mahalini', year: 2023, album: 'Sial' },
+    'pesan terakhir': { band: 'Lyodra', singer: 'Lyodra', year: 2021, album: 'Lyodra' },
+    'evaluasi': { band: 'Hindia', singer: 'Baskara Putra', year: 2019, album: 'Menari Dengan Bayangan' },
+    'lantas': { band: 'Juicy Luicy', singer: 'Julian', year: 2020, album: 'Lantas' },
+    'cinta melulu': { band: 'Efek Rumah Kaca', singer: 'Cholil Mahmud', year: 2007, album: 'Efek Rumah Kaca' }
+};
+
+const STATE = {
+    currentPlaylist: [], currentIndex: -1, currentSong: null,
+    isPlaying: false, isShuffle: false, isRepeat: false,
+    volume: CONFIG.DEFAULT_VOLUME, currentBand: null, currentLyricsText: '',
+    currentAnimeTheme: 'ryo', mascotState: 'normal',
+    idleTimer: null, bubbleTimer: null, firstBandPlayed: false
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+function formatTime(s) {
+    if (isNaN(s) || s < 0) return '0:00';
+    const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+function showToast(msg, icon) {
+    const t = $('#toast');
+    $('#toast-text').textContent = msg;
+    t.querySelector('i').className = 'fas ' + (icon || 'fa-info-circle');
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function escapeHTML(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function debounce(fn, d) {
+    let t; return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), d); };
+}
+function getBandAvatar(id) { return BAND_AVATARS[id] || BAND_AVATARS['iwanfals']; }
+function findBandByName(name) {
+    if (!name) return null;
+    const l = name.toLowerCase().trim();
+    return BANDS.find(b => b.name.toLowerCase() === l || b.id === l || l.includes(b.name.toLowerCase()));
+}
+function findSongInfo(title) {
+    if (!title) return null;
+    const l = title.toLowerCase().trim();
+    if (SONG_DATABASE[l]) return SONG_DATABASE[l];
+    for (const [k, v] of Object.entries(SONG_DATABASE)) {
+        if (l.includes(k) || k.includes(l)) return v;
+    }
+    return null;
+}
+
+// ============ API ============
+async function fetchWithProxy(url) {
+    // Backend dulu
+    try {
+        const u = new URL(url);
+        const query = u.searchParams.get('query') || u.searchParams.get('q');
+        if (url.includes('/search/songs') && query) {
+            const r = await fetch(`${CONFIG.BACKEND_URL}/search?q=${encodeURIComponent(query)}&limit=30`);
+            if (r.ok) {
+                const data = await r.json();
+                if (data) return data;
+            }
+        }
+    } catch (e) {}
+    // Fallback ke CORS proxy
+    for (const proxy of CONFIG.CORS_PROXIES) {
+        try {
+            const u = proxy.includes('?') ? proxy + encodeURIComponent(url) : proxy + url;
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 12000);
+            const res = await fetch(u, { signal: ctrl.signal });
+            clearTimeout(t);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success !== false) return data;
+            }
+        } catch (e) { console.warn('Proxy fail:', e.message); }
+    }
+    return null;
+}
+
+async function fetchSongs(query, limit = 25) {
+    const url = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`;
+    const data = await fetchWithProxy(url);
+    if (data && data.success && data.data?.results) {
+        return data.data.results.map(song => {
+            const artistName = song.artists?.primary?.[0]?.name || 'Unknown';
+            const band = findBandByName(artistName);
+            let image = song.image?.[2]?.url || song.image?.[1]?.url;
+            if (band) image = getBandAvatar(band.id);
+            return {
+                id: song.id,
+                title: song.name || 'Unknown',
+                artist: artistName,
+                image: image,
+                albumCover: song.image?.[2]?.url || song.image?.[1]?.url,
+                hasBandPhoto: !!band,
+                bandId: band ? band.id : null,
+                audio: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[0]?.url || '',
+                duration: song.duration || 0
+            };
+        }).filter(s => s.audio);
+    }
+    return [];
+}
+
+async function fetchLyrics(title, artist) {
+    try {
+        const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 8000);
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (res.ok) {
+            const d = await res.json();
+            if (d.lyrics) return d.lyrics;
+        }
+    } catch (e) {}
+    return null;
+}
+
+// ============ RENDER ============
+function renderBands(list, containerId) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    if (!list || !list.length) {
+        c.innerHTML = '<div class="no-results"><i class="fas fa-users"></i><p>Tidak ada band</p></div>';
+        return;
+    }
+    const frag = document.createDocumentFragment();
+    list.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'band-card';
+        card.innerHTML = `
+            <div class="band-img">
+                <img src="${getBandAvatar(b.id)}" alt="${escapeHTML(b.name)}" loading="lazy">
+                <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+            </div>
+            <h4>${escapeHTML(b.name)}</h4>
+            <p>${escapeHTML(b.country)}</p>
+            <span class="band-genre">${escapeHTML(b.genre)}</span>`;
+        // KLIK BAND → LANGSUNG PUTAR LAGU PERTAMA + BUKA DETAIL
+        card.addEventListener('click', () => openBandDetail(b, true));
+        frag.appendChild(card);
+    });
+    c.innerHTML = '';
+    c.appendChild(frag);
+}
+
+function renderSongs(songs, containerId, opts = {}) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    if (opts.loading) {
+        c.innerHTML = `<div class="loading-state"><i class="fas fa-spinner"></i> ${opts.loadingText || 'Memuat...'}</div>`;
+        return;
+    }
+    if (!songs || !songs.length) {
+        c.innerHTML = `<div class="no-results"><i class="fas fa-music"></i><p>${opts.emptyText || 'Tidak ditemukan'}</p><small>Coba kata kunci lain</small></div>`;
+        return;
+    }
+    const frag = document.createDocumentFragment();
+    const curId = STATE.currentSong?.id;
+    songs.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'song-card' + (s.id === curId ? ' playing' : '');
+        card.dataset.songId = s.id;
+        card.innerHTML = `
+            <div class="img-wrap">
+                <img src="${escapeHTML(s.image)}" alt="${escapeHTML(s.title)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHTML(s.albumCover || 'https://via.placeholder.com/300/1a0b2e/e879f9?text=♪')}'">
+                <div class="play-overlay"><i class="fas fa-play"></i></div>
+            </div>
+            <h4 title="${escapeHTML(s.title)}">${escapeHTML(s.title)}</h4>
+            <p title="${escapeHTML(s.artist)}">${escapeHTML(s.artist)}</p>`;
+        card.addEventListener('click', () => playSong(s, songs));
+        frag.appendChild(card);
+    });
+    c.innerHTML = '';
+    c.appendChild(frag);
+}
+
+function updatePlayingCard() {
+    $$('.song-card').forEach(c => c.classList.toggle('playing', STATE.currentSong && c.dataset.songId === STATE.currentSong.id));
+}
+
+// ============ BAND DETAIL ============
+async function openBandDetail(band, autoPlay = false) {
+    STATE.currentBand = band;
+    $('#home-view').style.display = 'none';
+    $('#search-view').style.display = 'none';
+    $('#anime-theme-page').classList.remove('show');
+    $('#band-detail-view').classList.add('show');
+    
+    $('#band-header').innerHTML = `
+        <div class="band-photo"><img src="${getBandAvatar(band.id)}" alt="${escapeHTML(band.name)}"></div>
+        <div class="band-info">
+            <div class="band-type">${escapeHTML(band.genre)}</div>
+            <h1>${escapeHTML(band.name)}</h1>
+            <div class="band-meta">
+                <span><i class="fas fa-globe"></i> ${escapeHTML(band.country)}</span>
+                <span><i class="fas fa-calendar"></i> Sejak ${band.year}</span>
+                <span><i class="fas fa-music"></i> ${band.songs.length}+ hits</span>
+            </div>
+            <div class="band-actions">
+                <button class="play-all" onclick="window.Goyzfy.playAllBandSongs()"><i class="fas fa-play"></i> Putar Semua</button>
+                <button class="follow-btn"><i class="fas fa-heart"></i> Ikuti</button>
+            </div>
+        </div>`;
+    $('#band-songs-title').textContent = `🎵 Semua Lagu ${band.name}`;
+    renderSongs(null, 'band-songs-grid', { loading: true, loadingText: `Memuat lagu ${band.name}...` });
+    
+    try {
+        const results = await fetchSongs(band.query, 50);
+        if (results.length) {
+            renderSongs(results, 'band-songs-grid');
+            STATE.currentPlaylist = results;
+            // AUTO PLAY lagu pertama
+            if (autoPlay && results.length > 0) {
+                playSong(results[0], results);
+                showToast('▶ Memutar: ' + results[0].title, 'fa-play');
+            }
+        } else {
+            renderSongs([], 'band-songs-grid', { emptyText: `Lagu ${band.name} tidak ditemukan` });
+        }
+    } catch (e) {
+        renderSongs([], 'band-songs-grid', { emptyText: 'Gagal memuat' });
+    }
+}
+
+function playAllBandSongs() {
+    if (STATE.currentPlaylist.length) {
+        playSong(STATE.currentPlaylist[0], STATE.currentPlaylist);
+        showToast('Memutar semua lagu ' + STATE.currentBand.name, 'fa-play');
+    } else showToast('Belum ada lagu', 'fa-info-circle');
+}
+
+// ============ PLAYER ============
+const audio = document.getElementById('audio-player');
+
+function playSong(song, playlist) {
+    if (!song || !song.audio) { showToast('Lagu tidak bisa diputar', 'fa-exclamation-triangle'); return; }
+    STATE.currentPlaylist = playlist || [song];
+    STATE.currentIndex = Math.max(0, STATE.currentPlaylist.findIndex(s => s.id === song.id));
+    STATE.currentSong = song;
+    audio.src = song.audio;
+    audio.volume = STATE.volume;
+    $('#player-img').src = song.image;
+    $('#player-title').textContent = song.title;
+    $('#player-artist').textContent = song.artist;
+    audio.play().then(() => {
+        STATE.isPlaying = true;
+        updatePlayButton();
+        updatePlayingCard();
+        showToast('▶ ' + song.title, 'fa-play');
+    }).catch(() => {
+        showToast('Klik play manual untuk memutar', 'fa-info-circle');
+        STATE.isPlaying = false; updatePlayButton();
+    });
+}
+
+function updatePlayButton() {
+    $('#play-btn').innerHTML = STATE.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+    $('#now-playing').classList.toggle('playing', STATE.isPlaying);
+}
+
+$('#play-btn').addEventListener('click', () => {
+    if (!audio.src) { showToast('Pilih lagu dulu!', 'fa-info-circle'); return; }
+    if (STATE.isPlaying) audio.pause(); else audio.play().catch(() => {});
+});
+$('#next-btn').addEventListener('click', () => {
+    if (!STATE.currentPlaylist.length) return;
+    STATE.currentIndex = STATE.isShuffle ? Math.floor(Math.random() * STATE.currentPlaylist.length) : (STATE.currentIndex + 1) % STATE.currentPlaylist.length;
+    playSong(STATE.currentPlaylist[STATE.currentIndex], STATE.currentPlaylist);
+});
+$('#prev-btn').addEventListener('click', () => {
+    if (!STATE.currentPlaylist.length) return;
+    if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+    STATE.currentIndex = (STATE.currentIndex - 1 + STATE.currentPlaylist.length) % STATE.currentPlaylist.length;
+    playSong(STATE.currentPlaylist[STATE.currentIndex], STATE.currentPlaylist);
+});
+$('#shuffle-btn').addEventListener('click', function () {
+    STATE.isShuffle = !STATE.isShuffle;
+    this.classList.toggle('active', STATE.isShuffle);
+    showToast(STATE.isShuffle ? '🔀 Acak AKTIF' : 'Acak MATI', 'fa-random');
+});
+$('#repeat-btn').addEventListener('click', function () {
+    STATE.isRepeat = !STATE.isRepeat;
+    this.classList.toggle('active', STATE.isRepeat);
+    showToast(STATE.isRepeat ? '🔁 Ulangi AKTIF' : 'Ulangi MATI', 'fa-redo');
+});
+$('#like-btn').addEventListener('click', function () {
+    this.classList.toggle('liked'); this.classList.toggle('far'); this.classList.toggle('fas');
+    showToast(this.classList.contains('liked') ? '❤️ Favorit' : 'Dihapus', 'fa-heart');
+});
+audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+        const p = (audio.currentTime / audio.duration) * 100;
+        $('#progress-fill').style.width = p + '%';
+        $('#current-time').textContent = formatTime(audio.currentTime);
+        $('#total-time').textContent = formatTime(audio.duration);
+    }
+});
+audio.addEventListener('ended', () => {
+    if (STATE.isRepeat) { audio.currentTime = 0; audio.play(); }
+    else if (STATE.currentPlaylist.length > 1) $('#next-btn').click();
+    else { STATE.isPlaying = false; updatePlayButton(); }
+});
+audio.addEventListener('play', () => { STATE.isPlaying = true; updatePlayButton(); });
+audio.addEventListener('pause', () => { STATE.isPlaying = false; updatePlayButton(); });
+audio.addEventListener('error', () => showToast('Gagal memuat audio', 'fa-exclamation-triangle'));
+$('#progress-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    if (audio.duration) audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+});
+$('#volume-slider').addEventListener('input', e => {
+    STATE.volume = e.target.value / 100;
+    audio.volume = STATE.volume;
+    updateVolumeIcon();
+});
+function updateVolumeIcon() {
+    const i = $('#volume-icon');
+    i.className = STATE.volume === 0 ? 'fas fa-volume-mute' : STATE.volume < 0.5 ? 'fas fa-volume-down' : 'fas fa-volume-up';
+}
+$('#volume-icon').addEventListener('click', () => {
+    STATE.volume = STATE.volume > 0 ? 0 : CONFIG.DEFAULT_VOLUME;
+    audio.volume = STATE.volume;
+    $('#volume-slider').value = STATE.volume * 100;
+    updateVolumeIcon();
+});
+
+// ============ SEARCH ============
+const searchInput = $('#search-input');
+async function performSearch(q) {
+    q = q.trim();
+    if (!q) { showHome(); return; }
+    $('#home-view').style.display = 'none';
+    $('#band-detail-view').classList.remove('show');
+    $('#anime-theme-page').classList.remove('show');
+    $('#search-view').style.display = 'block';
+    $('#search-title').textContent = `🔍 Hasil: "${q}"`;
+    renderSongs(null, 'search-grid', { loading: true, loadingText: `Mencari "${q}"...` });
+    const results = await fetchSongs(q, 30);
+    renderSongs(results, 'search-grid', { emptyText: `Tidak ditemukan "${q}"` });
+    if (results.length) showToast(`Ditemukan ${results.length} lagu`, 'fa-check-circle');
+}
+function showHome() {
+    $('#home-view').style.display = 'block';
+    $('#search-view').style.display = 'none';
+    $('#band-detail-view').classList.remove('show');
+    $('#anime-theme-page').classList.remove('show');
+    searchInput.value = '';
+    $('#clear-search').classList.remove('show');
+}
+$('#search-submit').addEventListener('click', () => performSearch(searchInput.value));
+$('#clear-search').addEventListener('click', () => { searchInput.value = ''; $('#clear-search').classList.remove('show'); showHome(); searchInput.focus(); });
+const debouncedSearch = debounce(v => { if (v.trim().length >= 3) performSearch(v); }, CONFIG.SEARCH_DEBOUNCE);
+searchInput.addEventListener('input', function () {
+    const v = this.value;
+    $('#clear-search').classList.toggle('show', !!v.trim());
+    if (!v.trim() && $('#search-view').style.display !== 'none') showHome();
+    debouncedSearch(v);
+});
+searchInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') { e.preventDefault(); performSearch(searchInput.value); }
+});
+
+// ============ LYRICS ============
+async function openLyrics() {
+    if (!STATE.currentSong) { showToast('Pilih lagu dulu!', 'fa-info-circle'); return; }
+    $('#lyrics-modal').classList.add('show');
+    $('#lyrics-title').textContent = STATE.currentSong.title;
+    $('#lyrics-artist').textContent = STATE.currentSong.artist;
+    $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik...</p></div>';
+    const lyrics = await fetchLyrics(STATE.currentSong.title, STATE.currentSong.artist);
+    if (lyrics) {
+        STATE.currentLyricsText = lyrics;
+        $('#lyrics-body').innerHTML = '<div style="font-size:15px;line-height:2;">' + escapeHTML(lyrics) + '</div>';
+    } else {
+        STATE.currentLyricsText = '';
+        $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik tidak tersedia</p></div>';
+    }
+}
+function closeLyrics() { $('#lyrics-modal').classList.remove('show'); }
+function copyLyrics() {
+    if (!STATE.currentLyricsText) { showToast('Tidak ada lirik', 'fa-info-circle'); return; }
+    navigator.clipboard.writeText(STATE.currentLyricsText).then(() => showToast('Lirik disalin! 📋', 'fa-check-circle')).catch(() => showToast('Gagal menyalin', 'fa-exclamation-triangle'));
+}
+$('#lyrics-btn').addEventListener('click', openLyrics);
+$('#lyrics-modal').addEventListener('click', e => { if (e.target.id === 'lyrics-modal') closeLyrics(); });
+
+// ============ ANIME THEME ============
+function openAnimeTheme() {
+    $('#home-view').style.display = 'none';
+    $('#search-view').style.display = 'none';
+    $('#band-detail-view').classList.remove('show');
+    $('#anime-theme-page').classList.add('show');
+    $('#hamburger-menu').classList.remove('show');
+    renderAnimeThemes();
+}
+function renderAnimeThemes() {
+    const c = $('#anime-grid');
+    c.innerHTML = '';
+    ANIME_THEMES.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'anime-card' + (STATE.currentAnimeTheme === t.id ? ' active' : '');
+        card.innerHTML = `
+            <div class="active-badge">✓ Aktif</div>
+            <img src="${t.image}" alt="${t.name}" onerror="this.src='https://via.placeholder.com/300/1a0b2e/e879f9?text=Anime'">
+            <h4>${escapeHTML(t.name)}</h4>
+            <p>${escapeHTML(t.desc)}</p>`;
+        card.addEventListener('click', () => selectAnimeTheme(t.id));
+        c.appendChild(card);
+    });
+}
+function selectAnimeTheme(id) {
+    const theme = ANIME_THEMES.find(t => t.id === id);
+    if (!theme) return;
+    document.body.style.animation = 'glitch 0.4s';
+    setTimeout(() => { document.body.style.animation = ''; }, 400);
+    STATE.currentAnimeTheme = id;
+    $('#mascot-img').src = theme.image;
+    document.documentElement.style.setProperty('--accent-primary', theme.colors.primary);
+    document.documentElement.style.setProperty('--accent-secondary', theme.colors.secondary);
+    try { localStorage.setItem('goyzfy_anime', id); } catch (e) {}
+    renderAnimeThemes();
+    showToast(`✨ Tema ${theme.name} diaktifkan!`, 'fa-dragon');
+}
+
+// ============ MASCOT ============
+const mascot = $('#mascot');
+const mascotImg = $('#mascot-img');
+const mascotBubble = $('#mascot-bubble');
+
+function setMascotState(state) {
+    STATE.mascotState = state;
+    const theme = ANIME_THEMES.find(t => t.id === STATE.currentAnimeTheme) || ANIME_THEMES[0];
+    switch (state) {
+        case 'normal':  mascotImg.src = theme.image; break;
+        case 'idle':    mascotImg.src = theme.idleImage; break;
+        case 'pulled':  mascotImg.src = theme.pulledImage; break;
+        case 'clicked': mascotImg.src = theme.clickedImage; break;
+        case 'placed':  mascotImg.src = theme.placedImage; break;
+    }
+}
+function showMascotBubble(text) {
+    mascotBubble.textContent = text;
+    mascotBubble.classList.add('show');
+    const rect = mascot.getBoundingClientRect();
+    mascotBubble.style.left = Math.min(rect.right + 10, window.innerWidth - 230) + 'px';
+    mascotBubble.style.bottom = (window.innerHeight - rect.top + 30) + 'px';
+    clearTimeout(STATE.bubbleTimer);
+    STATE.bubbleTimer = setTimeout(() => { mascotBubble.classList.remove('show'); }, CONFIG.BUBBLE_DURATION);
+}
+function startIdleTimer() {
+    clearTimeout(STATE.idleTimer);
+    STATE.idleTimer = setTimeout(() => {
+        if (STATE.mascotState === 'normal') {
+            setMascotState('idle');
+            mascot.classList.add('idle');
+            const theme = ANIME_THEMES.find(t => t.id === STATE.currentAnimeTheme) || ANIME_THEMES[0];
+            showMascotBubble(`Serius ga mau chat sama ${theme.name}? huwaaa 🥺`);
+            setTimeout(() => {
+                setMascotState('normal');
+                mascot.classList.remove('idle');
+            }, CONFIG.BUBBLE_DURATION);
+        }
+    }, CONFIG.IDLE_TIMEOUT);
+}
+let mascotDragging = false, mascotOffsetX = 0, mascotOffsetY = 0, mascotStartX = 0, mascotStartY = 0, mascotMoved = false;
+function onMascotDown(clientX, clientY) {
+    mascotDragging = true; mascotMoved = false;
+    mascotStartX = clientX; mascotStartY = clientY;
+    const r = mascot.getBoundingClientRect();
+    mascotOffsetX = clientX - r.left; mascotOffsetY = clientY - r.top;
+    mascot.classList.add('dragging');
+    setMascotState('pulled');
+    clearTimeout(STATE.idleTimer);
+}
+function onMascotMove(clientX, clientY) {
+    if (!mascotDragging) return;
+    if (Math.abs(clientX - mascotStartX) > 5 || Math.abs(clientY - mascotStartY) > 5) mascotMoved = true;
+    let l = clientX - mascotOffsetX;
+    let t = clientY - mascotOffsetY;
+    l = Math.max(0, Math.min(l, window.innerWidth - mascot.offsetWidth));
+    t = Math.max(0, Math.min(t, window.innerHeight - mascot.offsetHeight));
+    mascot.style.left = l + 'px';
+    mascot.style.top = t + 'px';
+    mascot.style.bottom = 'auto';
+}
+function onMascotUp() {
+    if (!mascotDragging) return;
+    mascotDragging = false;
+    mascot.classList.remove('dragging');
+    if (mascotMoved) {
+        const r = mascot.getBoundingClientRect();
+        const nearEdge = r.left < 80 || r.right > window.innerWidth - 80;
+        setMascotState(nearEdge ? 'placed' : 'normal');
+        setTimeout(() => setMascotState('normal'), 2000);
+    } else {
+        // Klik mascot → buka AI chat
+        setMascotState('clicked');
+        mascot.classList.add('glitch');
+        setTimeout(() => mascot.classList.remove('glitch'), 500);
+        setTimeout(() => setMascotState('normal'), 800);
+        aiWindow.classList.add('show');
+        aiInput.focus();
+    }
+    startIdleTimer();
+}
+mascot.addEventListener('mousedown', e => { e.preventDefault(); onMascotDown(e.clientX, e.clientY); });
+document.addEventListener('mousemove', e => onMascotMove(e.clientX, e.clientY));
+document.addEventListener('mouseup', onMascotUp);
+mascot.addEventListener('touchstart', e => { const t = e.touches[0]; onMascotDown(t.clientX, t.clientY); }, { passive: true });
+document.addEventListener('touchmove', e => { if (mascotDragging) { const t = e.touches[0]; onMascotMove(t.clientX, t.clientY); e.preventDefault(); } }, { passive: false });
+document.addEventListener('touchend', onMascotUp);
+startIdleTimer();
+
+// ============ HAMBURGER MENU ============
+$('#menu-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    $('#hamburger-menu').classList.toggle('show');
+});
+document.addEventListener('click', e => {
+    if (!e.target.closest('#hamburger-menu') && !e.target.closest('#menu-btn')) {
+        $('#hamburger-menu').classList.remove('show');
+    }
+});
+
+// ============ NAV & CATEGORY ============
+$$('.category-pill').forEach(p => p.addEventListener('click', function () {
+    $$('.category-pill').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    const cat = this.dataset.cat;
+    let f = BANDS;
+    if (cat === 'indo') f = BANDS.filter(b => b.country === 'Indonesia');
+    else if (cat === 'world') f = BANDS.filter(b => b.country !== 'Indonesia');
+    else if (cat === 'rock') f = BANDS.filter(b => /rock|metal|grunge/i.test(b.genre));
+    else if (cat === 'pop') f = BANDS.filter(b => /pop/i.test(b.genre));
+    else if (cat === 'indie') f = BANDS.filter(b => /indie/i.test(b.genre));
+    renderBands(f, 'band-grid');
+    showToast(f.length + ' band ditampilkan', 'fa-music');
+}));
+
+$$('.nav-item').forEach(item => item.addEventListener('click', function () {
+    $$('.nav-item').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    const nav = this.dataset.nav, pl = this.dataset.playlist;
+    if (nav === 'home') { showHome(); renderBands(BANDS, 'band-grid'); $('#main-content').scrollTop = 0; }
+    else if (nav === 'search') { searchInput.focus(); $('#main-content').scrollTop = 0; }
+    else if (nav === 'anime') { openAnimeTheme(); }
+    else if (pl) {
+        showHome();
+        if (pl === 'indo') renderBands(BANDS.filter(b => b.country === 'Indonesia'), 'band-grid');
+        else if (pl === 'world') renderBands(BANDS.filter(b => b.country !== 'Indonesia'), 'band-grid');
+        else if (pl === 'rock') renderBands(BANDS.filter(b => /rock|metal|grunge/i.test(b.genre)), 'band-grid');
+        else if (pl === 'pop') renderBands(BANDS.filter(b => /pop/i.test(b.genre)), 'band-grid');
+        else if (pl === 'indie') renderBands(BANDS.filter(b => /indie/i.test(b.genre)), 'band-grid');
+        $('#main-content').scrollTop = 0;
+    }
+}));
+
+// ============ AI CHAT ============
+const aiWindow = $('#ai-chat-window');
+const aiMessages = $('#ai-messages');
+const aiInput = $('#ai-input-field');
+const aiDragHeader = $('#ai-drag-header');
+
+$('#close-ai').addEventListener('click', () => aiWindow.classList.remove('show'));
+
+function addMsg(text, sender) {
+    const d = document.createElement('div');
+    d.className = 'message ' + sender;
+    d.innerHTML = text;
+    aiMessages.appendChild(d);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+function showTyping() {
+    const id = 't' + Date.now();
+    const d = document.createElement('div');
+    d.className = 'message bot'; d.id = id;
+    d.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    aiMessages.appendChild(d);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+    return id;
+}
+function removeTyping(id) { const e = document.getElementById(id); if (e) e.remove(); }
+function sendUserMessage(text) {
+    if (!text?.trim()) return;
+    addMsg(escapeHTML(text), 'user');
+    aiInput.value = '';
+    const tid = showTyping();
+    setTimeout(() => {
+        removeTyping(tid);
+        addMsg(getBotResponse(text), 'bot');
+    }, 500 + Math.random() * 700);
+}
+$('#send-ai-btn').addEventListener('click', () => sendUserMessage(aiInput.value));
+aiInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendUserMessage(aiInput.value); });
+$$('.quick-replies button').forEach(b => b.addEventListener('click', () => sendUserMessage(b.dataset.q)));
+
+// ============ AI KNOWLEDGE BASE ============
+function getBotResponse(input) {
+    const q = input.toLowerCase().trim();
+
+    // ============ PEMBUAT GOYZFY - UPDATED ============
+    if (q.includes('siapa yang membuat') || q.includes('pembuat goyzfy') || q.includes('pencipta goyzfy') || q.includes('yang buat goyzfy') || q.includes('siapa pembuat')) {
+        return "🎵 <b>GOYZFY</b> dibuat oleh <b>Bumi</b> dari <b>Tambun Utara</b>.<br><br>Dia sekolah di <b>SMP 1 Tambun Utara</b>.<br><br>Dia yang buat aplikasi ini!<br><br>Lu harus <b>terima kasih</b> sama dia karena dengerin lagu jadi <b>gratis</b>! 🎶<br><br><b>Bumi ganteng banget dah, emang THE BEST!</b> 😎✨🔥";
+    }
+    if (q.includes('goyzfy') && (q.includes('apa') || q.includes('itu') || q.includes('tentang'))) {
+        return "🎵 <b>GOYZFY</b> adalah aplikasi pemutar musik streaming gratis buatan <b>Bumi</b> dari <b>Tambun Utara</b>.<br><br><b>Fitur:</b><br>• Beranda khusus band<br>• Klik band → langsung putar lagu<br>• Putar lagu full<br>• Lirik otomatis<br>• Tema Anime<br>• Maskot interaktif";
+    }
+
+    // Song info queries
+    const m1 = q.match(/(?:siapa\s+(?:band|penyanyi|artis)|band\s+dari|penyanyi\s+dari)\s+(?:lagu\s+)?["']?([^"'\?]+?)["']?(?:\s+(?:apa|itu|ya|dong))?[\?]?$/);
+    if (m1) {
+        const songName = m1[1].trim();
+        const info = findSongInfo(songName);
+        if (info) {
+            return `🎵 <b>${escapeHTML(songName)}</b><br><br>🎸 <b>Band:</b> ${info.band}<br>🎤 <b>Penyanyi:</b> ${info.singer}<br>📅 <b>Tahun:</b> ${info.year}<br>💿 <b>Album:</b> ${info.album}<br><br>Cari di kolom pencarian! 🔍`;
+        }
+        return `🤔 Belum ada info tentang <b>${escapeHTML(songName)}</b>. Coba cari di kolom pencarian! 🔍`;
+    }
+    for (const [song, info] of Object.entries(SONG_DATABASE)) {
+        if (q.includes(song) && q.length < song.length + 40) {
+            return `🎵 <b>${song.replace(/\b\w/g, c => c.toUpperCase())}</b><br><br>🎸 <b>Band:</b> ${info.band}<br>🎤 <b>Penyanyi:</b> ${info.singer}<br>📅 <b>Tahun:</b> ${info.year}<br>💿 <b>Album:</b> ${info.album}`;
+        }
+    }
+    for (const b of BANDS) {
+        if (q.includes(b.name.toLowerCase()) || q.includes(b.id)) {
+            return `🎸 <b>${b.name}</b><br><br>🌍 <b>Asal:</b> ${b.country}<br>🎼 <b>Genre:</b> ${b.genre}<br>📅 <b>Berdiri:</b> ${b.year}<br>🎵 <b>Lagu hits:</b><br>• ${b.songs.slice(0, 5).join('<br>• ')}<br><br>Klik band di beranda! 🎶`;
+        }
+    }
+    if (q.includes('jendela kelas 1')) {
+        return "🎵 <b>Lagu 'Jendela Kelas 1' - Iwan Fals</b><br><br>Tentang <b>kehidupan anak sekolah</b> dari keluarga sederhana yang berjuang untuk belajar.<br><br>Tema: pendidikan, harapan, perjuangan. 💙";
+    }
+    if (q.includes('tema anime') || q.includes('ganti anime') || q.includes('qin') || q.includes('ryo')) {
+        return "🎨 Buka <b>menu hamburger</b> (garis 3 kiri atas) → pilih <b>Ganti Tema Anime</b>!<br><br>Tema:<br>• <b>Ryo Yamada</b> (Bocchi the Rock)<br>• <b>Qin Shi Huang</b> (Record of Ragnarok)";
+    }
+    if (q.includes('rekomendasi') || q.includes('saran lagu')) {
+        return "🎵 <b>Rekomendasi:</b><br><br>🇮🇩 Indonesia:<br>• Iwan Fals - Jendela Kelas 1<br>• Sheila On 7 - Dan<br>• Dewa 19 - Kangen<br><br>🌍 Dunia:<br>• Coldplay - Fix You<br>• Ed Sheeran - Perfect<br><br>Klik band di beranda! 🔍";
+    }
+    if (q === 'halo' || q === 'hai' || q === 'hello') return "Halo! 👋 Saya <b>Goyzfy AI</b>, siap bantu! 🎶";
+    if (q.includes('makasih') || q.includes('terima kasih')) return "Sama-sama! 🎵 Tanya lagi ya! 😊";
+
+    return "🤔 Coba tanya:<br>• <b>Siapa pembuat GOYZFY?</b><br>• <b>Siapa band dari lagu Jendela Kelas 1?</b><br>• <b>Info Iwan Fals / Sheila On 7</b><br>• <b>Rekomendasi lagu</b><br>• <b>Tema anime</b>";
+}
+
+// ============ DRAG AI ============
+let aiDragging = false, aiDox = 0, aiDoy = 0;
+function aiStartDrag(x, y) {
+    aiDragging = true;
+    const r = aiWindow.getBoundingClientRect();
+    aiDox = x - r.left; aiDoy = y - r.top;
+}
+function aiMoveDrag(x, y) {
+    if (!aiDragging) return;
+    let l = x - aiDox, t = y - aiDoy;
+    l = Math.max(0, Math.min(l, window.innerWidth - aiWindow.offsetWidth));
+    t = Math.max(0, Math.min(t, window.innerHeight - aiWindow.offsetHeight));
+    aiWindow.style.left = l + 'px';
+    aiWindow.style.top = t + 'px';
+    aiWindow.style.right = 'auto';
+    aiWindow.style.bottom = 'auto';
+}
+function aiEndDrag() { aiDragging = false; }
+aiDragHeader.addEventListener('mousedown', e => { if (e.target.closest('button')) return; e.preventDefault(); aiStartDrag(e.clientX, e.clientY); });
+document.addEventListener('mousemove', e => aiMoveDrag(e.clientX, e.clientY));
+document.addEventListener('mouseup', aiEndDrag);
+aiDragHeader.addEventListener('touchstart', e => { if (e.target.closest('button')) return; const t = e.touches[0]; aiStartDrag(t.clientX, t.clientY); }, { passive: true });
+document.addEventListener('touchmove', e => { if (aiDragging) { const t = e.touches[0]; aiMoveDrag(t.clientX, t.clientY); e.preventDefault(); } }, { passive: false });
+document.addEventListener('touchend', aiEndDrag);
+
+// ============ PROFILE ============
+$('#file-input').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 3 * 1024 * 1024) { showToast('Foto terlalu besar (max 3MB)', 'fa-exclamation-triangle'); return; }
+    const r = new FileReader();
+    r.onload = ev => { $('#avatar-preview').src = ev.target.result; };
+    r.readAsDataURL(f);
+});
+$('#start-btn').addEventListener('click', () => {
+    const name = $('#profile-input').value.trim() || 'Bumi';
+    const avatar = $('#avatar-preview').src;
+    try { localStorage.setItem('goyzfy_user', JSON.stringify({ name, avatar })); } catch (e) {}
+    $('#user-name-display').textContent = name;
+    $('#user-avatar-display').src = avatar;
+    $('#profile-page').style.opacity = '0';
+    setTimeout(() => {
+        $('#profile-page').style.display = 'none';
+        $('#main-app').classList.add('active');
+        loadInitialBands();
+    }, 400);
+});
+function logout() {
+    if (confirm('Kembali ke halaman profil?')) {
+        audio.pause(); audio.src = '';
+        $('#main-app').classList.remove('active');
+        $('#profile-page').style.display = 'flex';
+        $('#profile-page').style.opacity = '1';
+        STATE.currentSong = null;
+    }
+}
+try {
+    const u = JSON.parse(localStorage.getItem('goyzfy_user'));
+    if (u) {
+        $('#profile-input').value = u.name || 'Bumi';
+        if (u.avatar) $('#avatar-preview').src = u.avatar;
+    }
+    const anime = localStorage.getItem('goyzfy_anime');
+    if (anime) {
+        STATE.currentAnimeTheme = anime;
+        const theme = ANIME_THEMES.find(t => t.id === anime);
+        if (theme) {
+            $('#mascot-img').src = theme.image;
+            document.documentElement.style.setProperty('--accent-primary', theme.colors.primary);
+            document.documentElement.style.setProperty('--accent-secondary', theme.colors.secondary);
+        }
+    }
+} catch (e) {}
+
+// ============ INITIAL LOAD ============
+function loadInitialBands() {
+    renderBands(BANDS, 'band-grid');
+    $('#total-bands').textContent = BANDS.length + ' Band';
+    const total = BANDS.reduce((s, b) => s + b.songs.length, 0);
+    $('#total-songs').textContent = total + '+ lagu';
+}
+
+// ============ SPLASH AUTO HIDE ============
+setTimeout(() => {
+    const splash = $('#splash-screen');
+    if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(() => splash.remove(), 700);
+    }
+}, 3500);
+
+// ============ EXPORT API ============
+window.Goyzfy = {
+    showHome,
+    showAllBands: () => { renderBands(BANDS, 'band-grid'); $('#main-content').scrollTop = 0; },
+    openBandDetail,
+    playAllBandSongs,
+    closeLyrics,
+    copyLyrics,
+    logout,
+    playSong,
+    findSongInfo,
+    findBandByName,
+    openAnimeTheme
+};
+
+// Keyboard
+document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('#play-btn').click(); }
+});
+
+console.log('%c🎵 GOYZFY v' + CONFIG.VERSION, 'color:#e879f9;font-size:24px;font-weight:900;text-shadow:0 0 10px #c026d3;');
+console.log('%cBy ' + CONFIG.CREATOR + ' - ' + CONFIG.LOCATION, 'color:#22d3ee;font-size:13px;font-weight:bold;');
+console.log(`%c🎸 ${BANDS.length} Band • ${Object.keys(SONG_DATABASE).length}+ Songs`, 'color:#c026d3;');
+console.log('%c🎭 Maskot Interaktif | 🎨 2 Tema Anime', 'color:#e879f9;');
+
+})();
+</script>
+</body>
+</html>
