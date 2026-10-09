@@ -27,7 +27,7 @@
     --transition: 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; line-height: 1.5; }
+body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; height: 100dvh; overflow: hidden; line-height: 1.5; }
 button { cursor: pointer; font-family: inherit; border: none; background: none; color: inherit; font-size: inherit; outline: none; transition: var(--transition); }
 input { font-family: inherit; border: none; outline: none; background: none; color: inherit; font-size: inherit; }
 img, video { display: block; max-width: 100%; }
@@ -92,7 +92,7 @@ img, video { display: block; max-width: 100%; }
 #start-btn:hover { transform: translateY(-2px); }
 
 /* MAIN APP */
-#main-app { display: none; height: 100vh; position: relative; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 1fr var(--player-height); z-index: 1; }
+#main-app { display: none; height: 100vh; height: 100dvh; position: relative; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 1fr var(--player-height); z-index: 1; }
 #main-app.active { display: grid; }
 .sidebar { background: rgba(10,4,22,0.92); backdrop-filter: blur(15px); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid rgba(255,255,255,0.05); overflow-y: auto; z-index: 3; }
 .logo { font-size: 22px; font-weight: 900; letter-spacing: 3px; background: linear-gradient(90deg, #22d3ee, #c026d3, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; padding-left: 12px; display: flex; align-items: center; gap: 8px; }
@@ -300,8 +300,9 @@ img, video { display: block; max-width: 100%; }
 
 @media (max-width: 900px) { :root { --sidebar-width: 200px; } .band-header h1 { font-size: 38px; } .band-header .band-photo { width: 150px; height: 150px; } }
 @media (max-width: 768px) {
-    :root { --player-height: 130px; }
-    #main-app { grid-template-columns: 1fr; }
+    :root { --player-height: 72px; }
+    body, #main-app { height: 100vh; height: 100dvh; }
+    #main-app { grid-template-columns: 1fr; grid-template-rows: 1fr var(--player-height); }
     .sidebar { display: none; }
     .main-content { padding: 15px 18px 20px; }
     .hero { padding: 22px 22px; }
@@ -314,16 +315,121 @@ img, video { display: block; max-width: 100%; }
     .band-header .band-photo { width: 140px; height: 140px; }
     .band-header h1 { font-size: 28px; }
     .band-meta, .band-actions { justify-content: center; }
-    .player-bar { flex-direction: column; height: auto; padding: 10px 12px; gap: 8px; }
-    .now-playing, .player-center, .player-right { width: 100%; }
-    .now-playing { justify-content: center; text-align: center; }
-    .player-right { justify-content: center; }
-    #volume-slider { display: none; }
+
+    /* MOBILE PLAYER BAR */
+    .player-bar {
+        flex-direction: row;
+        height: var(--player-height);
+        padding: 0 12px;
+        gap: 8px;
+        position: relative;
+        justify-content: space-between;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    .now-playing {
+        width: auto;
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-start;
+        text-align: left;
+        gap: 8px;
+    }
+    .now-playing .cover-wrap {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .now-playing-info {
+        min-width: 0;
+        flex: 1;
+    }
+    .now-playing-info h4 {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+    .now-playing-info p {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .now-playing .like-btn {
+        font-size: 15px;
+        padding: 4px;
+        flex-shrink: 0;
+    }
+    .player-center {
+        width: auto;
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        max-width: none;
+    }
+    .player-controls {
+        gap: 8px;
+    }
+    .player-controls button {
+        font-size: 16px;
+        padding: 5px;
+    }
+    .player-controls .play-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+    }
+    #shuffle-btn, #repeat-btn {
+        display: none;
+    }
+    .progress-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 4px;
+        padding: 0;
+        gap: 0;
+        cursor: pointer;
+    }
+    .progress-container span {
+        display: none;
+    }
+    .progress-bar {
+        width: 100%;
+        height: 4px;
+        border-radius: 0;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .progress-fill {
+        border-radius: 0;
+    }
+    .player-right {
+        width: auto;
+        flex: 0 0 auto;
+        gap: 6px;
+    }
+    #volume-slider, #volume-icon {
+        display: none;
+    }
+    #lyrics-btn {
+        font-size: 16px;
+        padding: 5px;
+    }
     #ai-chat-window { width: calc(100% - 20px); right: 10px; bottom: 80px; height: 65vh; }
-    #mascot { width: 90px; height: 140px; bottom: calc(var(--player-height) + 15px); left: 10px; }
+    #mascot { width: 85px; height: 130px; bottom: calc(var(--player-height) + 12px); left: 10px; }
     #mascot-bubble { max-width: 180px; font-size: 12px; padding: 10px 14px; }
 }
-@media (max-width: 400px) { .band-grid, .song-grid { grid-template-columns: repeat(2, 1fr); } .player-controls { gap: 18px; } .band-header h1 { font-size: 22px; } }
+@media (max-width: 400px) {
+    .band-grid, .song-grid { grid-template-columns: repeat(2, 1fr); }
+    .player-controls { gap: 6px; }
+    .now-playing .like-btn { display: none; }
+    .band-header h1 { font-size: 22px; }
+}
 </style>
 </head>
 <body>
