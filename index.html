@@ -94,24 +94,73 @@ img, video { display: block; max-width: 100%; }
 #bg-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.35; pointer-events: none; }
 
 /* PROFILE */
-#profile-page { position: fixed; inset: 0; background: linear-gradient(135deg, #0a0416 0%, #1a0b2e 40%, #2d1b4e 70%, #0a0416 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; overflow: hidden; padding: 20px; }
+#profile-page { position: fixed; inset: 0; background: linear-gradient(135deg, #0a0416 0%, #1a0b2e 40%, #2d1b4e 70%, #0a0416 100%); display: flex; justify-content: center; align-items: flex-start; z-index: 9999; overflow-y: auto; overflow-x: hidden; padding: 25px 16px 40px; -webkit-overflow-scrolling: touch; }
 #profile-page::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 15% 25%, #fff, transparent), radial-gradient(1px 1px at 65% 70%, #fff, transparent), radial-gradient(1.5px 1.5px at 85% 15%, #22d3ee, transparent), radial-gradient(1px 1px at 35% 85%, #e879f9, transparent); background-size: 350px 350px; animation: twinkle 4s ease-in-out infinite; pointer-events: none; }
 .pixel-cloud { position: absolute; width: 10px; height: 10px; background: #a5b4fc; box-shadow: 10px 0 0 #a5b4fc, -10px 0 0 #a5b4fc, 20px 0 0 #a5b4fc, -20px 0 0 #a5b4fc, 0 -10px 0 #a5b4fc, 10px -10px 0 #a5b4fc, -10px -10px 0 #a5b4fc; opacity: 0.5; animation: floatCloud 10s ease-in-out infinite; pointer-events: none; }
 .pc1 { top: 12%; left: 8%; }
 .pc2 { top: 22%; right: 12%; transform: scale(1.4); animation-delay: -3s; }
 .pc3 { bottom: 18%; left: 15%; transform: scale(0.9); animation-delay: -6s; }
-.profile-card { position: relative; z-index: 2; background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.18); border-radius: 28px; padding: 45px 35px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 25px 70px rgba(0,0,0,0.7); animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.profile-card { position: relative; z-index: 2; background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.18); border-radius: 28px; padding: 32px 22px 28px; text-align: center; width: 100%; max-width: 400px; box-shadow: 0 25px 70px rgba(0,0,0,0.7); animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); margin: auto; }
 .profile-card h1 { font-size: 34px; font-weight: 900; letter-spacing: 4px; background: linear-gradient(90deg, #22d3ee, #c026d3, #e879f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-.profile-card h2 { font-size: 22px; margin-bottom: 5px; font-weight: 600; }
-.profile-card p { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 25px; }
-.avatar-upload { position: relative; width: 110px; height: 110px; margin: 0 auto 25px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-primary); cursor: pointer; background: #222; box-shadow: 0 0 30px rgba(192,38,211,0.6); }
+.profile-card h2 { font-size: 22px; margin-bottom: 4px; font-weight: 600; }
+.profile-card p.profile-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
+.avatar-upload { position: relative; width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-primary); cursor: pointer; background: #222; box-shadow: 0 0 30px rgba(192,38,211,0.6); }
 .avatar-upload:hover { transform: scale(1.05); }
 .avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
-.avatar-upload .icon-cam { position: absolute; bottom: 2px; right: 2px; background: var(--accent-primary); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 2px solid #fff; }
-#profile-input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 15px; text-align: center; margin-bottom: 18px; }
+.avatar-upload .icon-cam { position: absolute; bottom: 2px; right: 2px; background: var(--accent-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; border: 2px solid #fff; }
+#profile-input { width: 100%; padding: 14px 18px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 15px; text-align: center; margin-bottom: 15px; }
 #profile-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 25px rgba(192,38,211,0.5); }
-#start-btn { width: 100%; padding: 15px; border-radius: 14px; background: linear-gradient(90deg, #c026d3, #e879f9); color: white; font-size: 16px; font-weight: 700; letter-spacing: 1.5px; box-shadow: 0 8px 25px rgba(192,38,211,0.5); }
+#start-btn { width: 100%; padding: 14px; border-radius: 14px; background: linear-gradient(90deg, #c026d3, #e879f9); color: white; font-size: 15px; font-weight: 700; letter-spacing: 1.5px; box-shadow: 0 8px 25px rgba(192,38,211,0.5); margin-bottom: 4px; }
 #start-btn:hover { transform: translateY(-2px); }
+
+/* CREATOR INTRO & SOCIAL MEDIA SECTION */
+.creator-intro-section { margin-top: 22px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,0.18); text-align: center; }
+.creator-divider { display: inline-flex; align-items: center; gap: 7px; padding: 4px 14px; background: linear-gradient(90deg, rgba(34,211,238,0.15), rgba(192,38,211,0.25), rgba(232,121,249,0.15)); border: 1px solid rgba(192,38,211,0.4); border-radius: var(--radius-full); font-size: 11px; font-weight: 800; letter-spacing: 1.2px; color: #e879f9; margin-bottom: 12px; text-transform: uppercase; box-shadow: 0 0 15px rgba(192,38,211,0.25); }
+.creator-bio-card { background: rgba(0,0,0,0.32); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 14px 15px; margin-bottom: 14px; text-align: left; backdrop-filter: blur(12px); box-shadow: inset 0 0 20px rgba(0,0,0,0.3); }
+.creator-bio-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.creator-bio-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent-secondary); background: #140828; box-shadow: 0 0 15px rgba(192,38,211,0.4); flex-shrink: 0; object-fit: cover; }
+.creator-bio-title h3 { font-size: 15px; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px; line-height: 1.2; margin: 0; }
+.creator-bio-title .badge-dev { font-size: 9px; font-weight: 800; padding: 2px 7px; background: linear-gradient(90deg, #22d3ee, #c026d3); color: white; border-radius: var(--radius-full); letter-spacing: 0.5px; text-transform: uppercase; }
+.creator-bio-title p { font-size: 11px; color: var(--cyan-primary); margin: 3px 0 0; font-weight: 500; }
+.creator-bio-desc { font-size: 11.5px; line-height: 1.55; color: rgba(255,255,255,0.85); margin: 0; }
+.social-section-title { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 9px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.social-buttons-grid { display: flex; flex-direction: column; gap: 9px; }
+.social-link-btn { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px; text-decoration: none; color: white; font-weight: 600; font-size: 13px; transition: var(--transition); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.14); }
+.social-link-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.6); filter: brightness(1.1); }
+.social-link-btn .social-icon-box { width: 32px; height: 32px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
+.social-link-btn .social-meta { flex: 1; display: flex; flex-direction: column; text-align: left; }
+.social-link-btn .social-meta .platform-name { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.85; }
+.social-link-btn .social-meta .platform-handle { font-size: 12.5px; font-weight: 700; color: #ffffff; }
+.social-link-btn .social-arrow { font-size: 11px; opacity: 0.6; }
+.social-link-btn.btn-ig { background: linear-gradient(135deg, rgba(131,58,180,0.85) 0%, rgba(253,29,29,0.85) 50%, rgba(252,176,69,0.85) 100%); border-color: rgba(253,29,29,0.4); box-shadow: 0 4px 15px rgba(253,29,29,0.25); }
+.social-link-btn.btn-ig .social-icon-box { background: rgba(255,255,255,0.22); }
+.social-link-btn.btn-tt { background: linear-gradient(135deg, rgba(8,8,12,0.92) 0%, rgba(24,24,34,0.95) 100%); border: 1px solid rgba(34,211,238,0.5); box-shadow: 0 4px 18px rgba(34,211,238,0.25), inset 0 0 10px rgba(232,121,249,0.18); }
+.social-link-btn.btn-tt .social-icon-box { background: linear-gradient(135deg, #22d3ee, #ec4899); color: #000; }
+.social-link-btn.btn-wa { background: linear-gradient(135deg, rgba(37,211,102,0.85) 0%, rgba(18,140,126,0.92) 100%); border-color: rgba(37,211,102,0.45); box-shadow: 0 4px 15px rgba(37,211,102,0.25); }
+.social-link-btn.btn-wa .social-icon-box { background: rgba(255,255,255,0.22); }
+
+/* ABOUT CREATOR MODAL */
+#about-creator-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+#about-creator-modal.show { display: flex; animation: fadeIn 0.3s; }
+.about-modal-card { background: linear-gradient(135deg, rgba(26,11,46,0.98), rgba(45,27,78,0.98)); border: 1px solid var(--accent-primary); border-radius: 28px; width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto; padding: 26px 22px 24px; animation: modalIn 0.35s; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 35px rgba(192,38,211,0.3); text-align: center; }
+.about-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.creator-badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(192,38,211,0.2); border: 1px solid var(--accent-primary); border-radius: var(--radius-full); font-size: 11px; font-weight: 800; color: var(--accent-secondary); letter-spacing: 1px; text-transform: uppercase; }
+.close-about-btn { background: rgba(255,255,255,0.1); color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+.close-about-btn:hover { background: var(--red-primary); transform: rotate(90deg); }
+.creator-modal-avatar { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; margin: 0 auto 12px; border: 3px solid var(--accent-primary); box-shadow: 0 0 25px rgba(192,38,211,0.6); }
+.creator-modal-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.about-modal-body h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: white; }
+.creator-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; }
+.creator-tag-item { font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-full); color: rgba(255,255,255,0.85); font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.creator-tag-item i { color: var(--cyan-primary); }
+.creator-story { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.8); margin-bottom: 18px; text-align: center; }
+
+/* LRCLIB LYRICS ENHANCEMENTS */
+.lyrics-provider-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: linear-gradient(135deg, rgba(34,211,238,0.2), rgba(192,38,211,0.2)); border: 1px solid rgba(34,211,238,0.5); border-radius: var(--radius-full); font-size: 11px; font-weight: 800; color: var(--cyan-primary); letter-spacing: 0.8px; text-transform: uppercase; box-shadow: 0 0 12px rgba(34,211,238,0.25); }
+.lrc-line { margin-bottom: 6px; }
+.lrc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--accent-secondary); background: rgba(192,38,211,0.18); padding: 1px 6px; border-radius: 4px; margin-right: 8px; font-family: monospace; }
+.lrc-text { color: #f3f4f6; }
+.lrc-empty-line { height: 12px; }
 
 /* MAIN APP */
 #main-app { display: none; width: 100%; max-width: 100%; height: 100vh; height: 100dvh; position: relative; grid-template-columns: 1fr; grid-template-rows: 1fr var(--player-height); z-index: 1; margin: 0; }
@@ -835,7 +884,7 @@ img, video { display: block; max-width: 100%; }
     <div class="profile-card">
         <h1>GOYZFY</h1>
         <h2>Buat Profil</h2>
-        <p>Isi nama dan pilih foto profil kamu</p>
+        <p class="profile-sub">Isi nama dan pilih foto profil kamu</p>
         <div class="avatar-upload" onclick="document.getElementById('file-input').click()">
             <img id="avatar-preview" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy&backgroundColor=c026d3" alt="Avatar">
             <div class="icon-cam"><i class="fas fa-camera"></i></div>
@@ -843,6 +892,62 @@ img, video { display: block; max-width: 100%; }
         <input type="file" id="file-input" accept="image/*" style="display:none;">
         <input type="text" id="profile-input" placeholder="Masukkan nama..." value="Bumi" maxlength="20">
         <button id="start-btn">MULAI MAIN 🎵</button>
+
+        <!-- INTRO ABOUT ME & SOCIAL MEDIA BUTTONS -->
+        <div class="creator-intro-section">
+            <div class="creator-divider">
+                <i class="fas fa-crown"></i> About Me & Creator
+            </div>
+            
+            <div class="creator-bio-card">
+                <div class="creator-bio-header">
+                    <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=BumiAgoy&backgroundColor=c026d3" alt="Bumi" class="creator-bio-avatar">
+                    <div class="creator-bio-title">
+                        <h3>Bumi (Agoy) <span class="badge-dev">Creator</span></h3>
+                        <p><i class="fas fa-map-marker-alt"></i> Tambun Utara • SMPN 1 Tambun Utara</p>
+                    </div>
+                </div>
+                <p class="creator-bio-desc">
+                    Pencipta <b>Goyzfy Anime Edition</b>. Streaming musik gratis, ribuan lagu hits, lirik real-time LRCLIB, & anime theme!
+                </p>
+            </div>
+
+            <div class="social-section-title">
+                <i class="fas fa-link"></i> Ikuti / Hubungi Creator
+            </div>
+
+            <div class="social-buttons-grid">
+                <!-- Instagram Button -->
+                <a href="https://www.instagram.com/_bumibukanor4ng?vrfl=OWNoamN6bG1wbTBm" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-ig" title="Instagram @_bumibukanor4ng">
+                    <div class="social-icon-box"><i class="fab fa-instagram"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">Instagram</span>
+                        <span class="platform-handle">@_bumibukanor4ng</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+
+                <!-- TikTok Button -->
+                <a href="https://www.tiktok.com/@_bumiajalahbukan" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-tt" title="TikTok @_bumiajalahbukan">
+                    <div class="social-icon-box"><i class="fab fa-tiktok"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">TikTok</span>
+                        <span class="platform-handle">@_bumiajalahbukan</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+
+                <!-- WhatsApp Button -->
+                <a href="https://wa.me/6285781018270" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-wa" title="WhatsApp 085781018270">
+                    <div class="social-icon-box"><i class="fab fa-whatsapp"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">WhatsApp</span>
+                        <span class="platform-handle">0857-8101-8270</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -861,7 +966,7 @@ img, video { display: block; max-width: 100%; }
         <div class="nav-item" data-playlist="rock"><i class="fas fa-guitar"></i><span>Rock</span></div>
         <div class="nav-item" data-playlist="pop"><i class="fas fa-star"></i><span>Pop</span></div>
         <div class="nav-item" data-playlist="indie"><i class="fas fa-leaf"></i><span>Indie</span></div>
-        <div class="sidebar-footer">© 2026 Goyzfy<br>By Bumi (Agoy)<br>Tambun Utara ❤</div>
+        <div class="sidebar-footer" style="cursor:pointer;" onclick="window.Goyzfy.openAboutModal()" title="Klik untuk lihat profil Creator">© 2026 Goyzfy<br>By Bumi (Agoy) ✨<br>Tambun Utara ❤</div>
     </aside>
 
     <main class="main-content" id="main-content">
@@ -869,6 +974,7 @@ img, video { display: block; max-width: 100%; }
             <button onclick="window.Goyzfy.openAnimeTheme()"><i class="fas fa-dragon"></i> Ganti Tema Anime</button>
             <button onclick="window.Goyzfy.showHome()"><i class="fas fa-home"></i> Beranda</button>
             <button onclick="window.Goyzfy.showAllBands()"><i class="fas fa-users"></i> Semua Band</button>
+            <button onclick="window.Goyzfy.openAboutModal()"><i class="fas fa-id-card"></i> Tentang Creator (Bumi)</button>
             <div class="menu-divider"></div>
             <button onclick="window.Goyzfy.logout()"><i class="fas fa-sign-out-alt"></i> Keluar</button>
         </div>
@@ -1135,6 +1241,62 @@ img, video { display: block; max-width: 100%; }
         <div class="lyrics-actions">
             <button onclick="window.Goyzfy.copyLyrics()"><i class="fas fa-copy"></i> Salin</button>
             <button onclick="window.Goyzfy.closeLyrics()"><i class="fas fa-check"></i> Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT CREATOR MODAL -->
+<div id="about-creator-modal">
+    <div class="about-modal-card">
+        <div class="about-modal-header">
+            <div class="creator-badge-pill"><i class="fas fa-crown"></i> Creator Profile</div>
+            <button class="close-about-btn" onclick="window.Goyzfy.closeAboutModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="about-modal-body">
+            <div class="creator-modal-avatar">
+                <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=BumiAgoy&backgroundColor=c026d3" alt="Bumi">
+            </div>
+            <h2>Bumi (Agoy)</h2>
+            <div class="creator-meta-tags">
+                <span class="creator-tag-item"><i class="fas fa-map-marker-alt"></i> Tambun Utara, Bekasi</span>
+                <span class="creator-tag-item"><i class="fas fa-graduation-cap"></i> SMPN 1 Tambun Utara</span>
+            </div>
+            <p class="creator-story">
+                Pencipta dan pengembang web streaming musik <b>Goyzfy Anime Edition</b>. Dilengkapi katalog band legendaris, lirik sinkron dari <b>LRCLIB</b>, tema anime, serta maskot interaktif!
+            </p>
+
+            <div class="social-section-title">
+                <i class="fas fa-link"></i> Medsos & Kontak Resmi
+            </div>
+
+            <div class="social-buttons-grid">
+                <a href="https://www.instagram.com/_bumibukanor4ng?vrfl=OWNoamN6bG1wbTBm" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-ig" title="Instagram @_bumibukanor4ng">
+                    <div class="social-icon-box"><i class="fab fa-instagram"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">Instagram</span>
+                        <span class="platform-handle">@_bumibukanor4ng</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+
+                <a href="https://www.tiktok.com/@_bumiajalahbukan" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-tt" title="TikTok @_bumiajalahbukan">
+                    <div class="social-icon-box"><i class="fab fa-tiktok"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">TikTok</span>
+                        <span class="platform-handle">@_bumiajalahbukan</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+
+                <a href="https://wa.me/6285781018270" target="_blank" rel="noopener noreferrer" class="social-link-btn btn-wa" title="WhatsApp 085781018270">
+                    <div class="social-icon-box"><i class="fab fa-whatsapp"></i></div>
+                    <div class="social-meta">
+                        <span class="platform-name">WhatsApp</span>
+                        <span class="platform-handle">0857-8101-8270</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square social-arrow"></i>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -1471,26 +1633,65 @@ async function fetchSongs(query, limit = 100, page = 1) {
 }
 
 async function fetchLyrics(title, artist) {
+    // 1. Query ke backend server Goyzfy yang sudah terintegrasi LRCLIB (https://lrclib.net/api/)
     try {
         const res = await fetch(`${CONFIG.BACKEND_URL}/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`);
         if (res.ok) {
             const d = await res.json();
-            if (d.lyrics) return d.lyrics;
+            if (d.lyrics) return { lyrics: d.lyrics, source: d.source || 'LRCLIB', syncedLyrics: d.syncedLyrics };
         }
     } catch (e) {}
 
+    // 2. Direct Fallback ke LRCLIB Direct Get API jika koneksi backend bermasalah
     try {
-        const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+        const cleanTitle = title.replace(/\s*[\(\[](?:feat|ft|official|remix|mv|video|lyrics|audio|clip|ver|version|ost|hd|4k)[\.\)].*$/i, '').trim();
+        const cleanArtist = artist.replace(/\s*[\(\[](?:feat|ft)[\.\)].*$/i, '').split(/[,&/]/)[0].trim();
+        const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(cleanArtist)}&track_name=${encodeURIComponent(cleanTitle)}`;
         const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 8000);
+        const t = setTimeout(() => ctrl.abort(), 6000);
         const res = await fetch(url, { signal: ctrl.signal });
         clearTimeout(t);
         if (res.ok) {
             const d = await res.json();
-            if (d.lyrics) return d.lyrics;
+            if (d.plainLyrics || d.syncedLyrics) {
+                return { lyrics: d.plainLyrics || d.syncedLyrics, source: 'LRCLIB', syncedLyrics: d.syncedLyrics };
+            }
         }
     } catch (e) {}
+
+    // 3. Direct Fallback ke LRCLIB Search API
+    try {
+        const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(title + ' ' + artist)}`;
+        const ctrl2 = new AbortController();
+        const t2 = setTimeout(() => ctrl2.abort(), 6000);
+        const res = await fetch(searchUrl, { signal: ctrl2.signal });
+        clearTimeout(t2);
+        if (res.ok) {
+            const list = await res.json();
+            if (Array.isArray(list) && list.length > 0) {
+                const match = list.find(item => item.plainLyrics || item.syncedLyrics);
+                if (match) {
+                    return { lyrics: match.plainLyrics || match.syncedLyrics, source: 'LRCLIB', syncedLyrics: match.syncedLyrics };
+                }
+            }
+        }
+    } catch (e) {}
+
     return null;
+}
+
+function formatLyricsDisplay(text) {
+    if (!text) return '';
+    const lines = text.split('\n');
+    return lines.map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '<div class="lrc-empty-line">&nbsp;</div>';
+        const match = trimmed.match(/^\[(\d{2}:\d{2}(?:\.\d{2,3})?)\](.*)$/);
+        if (match) {
+            return `<div class="lrc-line"><span class="lrc-badge">${escapeHTML(match[1])}</span><span class="lrc-text">${escapeHTML(match[2].trim() || '...')}</span></div>`;
+        }
+        return `<div class="lrc-line">${escapeHTML(trimmed)}</div>`;
+    }).join('');
 }
 
 // ============ RENDER BANDS WITH REAL THUMBNAILS ============
@@ -1786,18 +1987,20 @@ function updatePlayButton() {
 
 async function preloadLyrics(title, artist) {
     const pane = $('#fp-lyrics-content');
-    if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik...</p></div>';
-    const lyrics = await fetchLyrics(title, artist);
-    if (lyrics) {
-        STATE.currentLyricsText = lyrics;
-        if (pane) pane.innerHTML = `<div style="font-size:16px;line-height:2.2;">${escapeHTML(lyrics)}</div>`;
+    if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik dari LRCLIB...</p></div>';
+    const res = await fetchLyrics(title, artist);
+    if (res && res.lyrics) {
+        STATE.currentLyricsText = res.lyrics;
+        const sourceBadge = `<div style="margin-bottom:12px;"><span class="lyrics-provider-pill"><i class="fas fa-bolt"></i> Ditenagai oleh ${escapeHTML(res.source || 'LRCLIB')}</span></div>`;
+        const formatted = formatLyricsDisplay(res.lyrics);
+        if (pane) pane.innerHTML = `${sourceBadge}<div style="font-size:16px;line-height:2.2;">${formatted}</div>`;
         const modalBody = $('#lyrics-body');
-        if (modalBody) modalBody.innerHTML = `<div style="font-size:15px;line-height:2;">${escapeHTML(lyrics)}</div>`;
+        if (modalBody) modalBody.innerHTML = `${sourceBadge}<div style="font-size:15px;line-height:2;">${formatted}</div>`;
     } else {
         STATE.currentLyricsText = '';
-        if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini</p></div>';
+        if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini di LRCLIB</p></div>';
         const modalBody = $('#lyrics-body');
-        if (modalBody) modalBody.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini</p></div>';
+        if (modalBody) modalBody.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini di LRCLIB</p></div>';
     }
 }
 
@@ -2086,14 +2289,16 @@ async function openLyrics() {
     $('#lyrics-modal').classList.add('show');
     $('#lyrics-title').textContent = STATE.currentSong.title;
     $('#lyrics-artist').textContent = STATE.currentSong.artist;
-    $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik...</p></div>';
-    const lyrics = await fetchLyrics(STATE.currentSong.title, STATE.currentSong.artist);
-    if (lyrics) {
-        STATE.currentLyricsText = lyrics;
-        $('#lyrics-body').innerHTML = '<div style="font-size:15px;line-height:2;">' + escapeHTML(lyrics) + '</div>';
+    $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik dari LRCLIB...</p></div>';
+    const res = await fetchLyrics(STATE.currentSong.title, STATE.currentSong.artist);
+    if (res && res.lyrics) {
+        STATE.currentLyricsText = res.lyrics;
+        const sourceBadge = `<div style="margin-bottom:12px;"><span class="lyrics-provider-pill"><i class="fas fa-bolt"></i> Ditenagai oleh ${escapeHTML(res.source || 'LRCLIB')}</span></div>`;
+        const formatted = formatLyricsDisplay(res.lyrics);
+        $('#lyrics-body').innerHTML = `${sourceBadge}<div style="font-size:15px;line-height:2;">${formatted}</div>`;
     } else {
         STATE.currentLyricsText = '';
-        $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik tidak tersedia</p></div>';
+        $('#lyrics-body').innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia di LRCLIB</p></div>';
     }
 }
 function closeLyrics() { $('#lyrics-modal').classList.remove('show'); }
@@ -2103,6 +2308,16 @@ function copyLyrics() {
 }
 $('#lyrics-btn').addEventListener('click', openLyrics);
 $('#lyrics-modal').addEventListener('click', e => { if (e.target.id === 'lyrics-modal') closeLyrics(); });
+
+// ============ ABOUT CREATOR MODAL ============
+function openAboutModal() {
+    $('#about-creator-modal').classList.add('show');
+    $('#hamburger-menu').classList.remove('show');
+}
+function closeAboutModal() {
+    $('#about-creator-modal').classList.remove('show');
+}
+$('#about-creator-modal')?.addEventListener('click', e => { if (e.target.id === 'about-creator-modal') closeAboutModal(); });
 
 // ============ ANIME THEME ============
 function openAnimeTheme() {
@@ -2466,7 +2681,9 @@ window.Goyzfy = {
     playSong,
     findSongInfo,
     findBandByName,
-    openAnimeTheme
+    openAnimeTheme,
+    openAboutModal,
+    closeAboutModal
 };
 
 // Keyboard

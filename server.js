@@ -548,13 +548,100 @@ app.get('/api/lyrics', async (req, res) => {
         if (!title || !artist) {
             return res.status(400).json({ success: false, error: 'Query parameters "title" and "artist" are required' });
         }
-        const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
-        const response = await axios.get(url, { timeout: 8000 });
-        return res.json({ success: true, lyrics: response.data.lyrics || '' });
-    } catch (err) {
-        return res.status(err.response?.status === 404 ? 404 : 500).json({
+
+        // Pembersihan judul & nama artis dari embel-embel umum untuk mencocokkan di LRCLIB
+        const cleanTitle = title
+            .replace(/\s*[\(\[](?:feat|ft|official|remix|mv|video|lyrics|audio|clip|ver|version|ost|hd|4k)[\.\)].*$/i, '')
+            .replace(/\s*-\s*(?:official|remix|mv|video|lyrics|audio).*$/i, '')
+            .trim();
+        const cleanArtist = artist
+            .replace(/\s*[\(\[](?:feat|ft)[\.\)].*$/i, '')
+            .split(/[,&/]/)[0]
+            .trim();
+
+        const customHeaders = {
+            'User-Agent': 'Goyzfy/8.2 (https://github.com/nellseen/goyzfy)'
+        };
+
+        // 1. Coba LRCLIB Direct Get: https://lrclib.net/api/get
+        try {
+            const lrclibRes = await axios.get('https://lrclib.net/api/get', {
+                params: {
+                    artist_name: cleanArtist,
+                    track_name: cleanTitle
+                },
+                headers: customHeaders,
+                timeout: 5000
+            });
+            if (lrclibRes.data) {
+                const plain = lrclibRes.data.plainLyrics;
+                const synced = lrclibRes.data.syncedLyrics;
+                if (plain || synced) {
+                    return res.json({
+                        success: true,
+                        lyrics: plain || synced,
+                        syncedLyrics: synced || null,
+                        trackName: lrclibRes.data.trackName || title,
+                        artistName: lrclibRes.data.artistName || artist,
+                        source: 'LRCLIB'
+                    });
+                }
+            }
+        } catch (e) {
+            // Lanjut ke pencarian LRCLIB jika direct get gagal/404
+        }
+
+        // 2. Coba LRCLIB Search: https://lrclib.net/api/search
+        try {
+            const searchQuery = `${cleanTitle} ${cleanArtist}`.trim();
+            const lrclibSearchRes = await axios.get('https://lrclib.net/api/search', {
+                params: { q: searchQuery },
+                headers: customHeaders,
+                timeout: 5000
+            });
+            if (Array.isArray(lrclibSearchRes.data) && lrclibSearchRes.data.length > 0) {
+                const match = lrclibSearchRes.data.find(item => item.plainLyrics || item.syncedLyrics);
+                if (match) {
+                    return res.json({
+                        success: true,
+                        lyrics: match.plainLyrics || match.syncedLyrics,
+                        syncedLyrics: match.syncedLyrics || null,
+                        trackName: match.trackName || title,
+                        artistName: match.artistName || artist,
+                        source: 'LRCLIB'
+                    });
+                }
+            }
+        } catch (e) {
+            // Lanjut ke fallback
+        }
+
+        // 3. Fallback: lyrics.ovh
+        try {
+            const ovhRes = await axios.get(`https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`, {
+                timeout: 5000
+            });
+            if (ovhRes.data && ovhRes.data.lyrics) {
+                return res.json({
+                    success: true,
+                    lyrics: ovhRes.data.lyrics,
+                    syncedLyrics: null,
+                    trackName: title,
+                    artistName: artist,
+                    source: 'lyrics.ovh'
+                });
+            }
+        } catch (e) {}
+
+        return res.status(404).json({
             success: false,
-            error: 'Lyrics not found'
+            error: 'Lirik tidak ditemukan di LRCLIB maupun provider fallback'
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            error: 'Gagal mengambil lirik',
+            detail: err.message
         });
     }
 });
