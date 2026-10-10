@@ -189,25 +189,106 @@ img, video { display: block; max-width: 100%; }
 .now-playing .like-btn { color: var(--text-secondary); cursor: pointer; font-size: 16px; flex-shrink: 0; }
 .now-playing .like-btn:hover { color: var(--accent-secondary); }
 .now-playing .like-btn.liked { color: var(--red-primary); }
-.player-center { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 550px; }
-.player-controls { display: flex; align-items: center; gap: 20px; }
-.player-controls button { color: var(--text-secondary); font-size: 17px; padding: 5px; display: flex; align-items: center; justify-content: center; }
+.now-playing { cursor: pointer; border-radius: 12px; padding: 4px 8px; transition: background 0.2s; position: relative; }
+.now-playing:hover { background: rgba(255,255,255,0.06); }
+.now-playing .expand-hint { position: absolute; right: 8px; top: 8px; font-size: 11px; opacity: 0; color: var(--accent-secondary); transition: 0.2s; }
+.now-playing:hover .expand-hint { opacity: 0.8; }
+.player-bar { transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
+.player-bar.playing { border-top-color: var(--player-accent-1, rgba(192,38,211,0.35)); box-shadow: 0 -8px 30px rgba(0,0,0,0.7), 0 -2px 25px var(--player-accent-1, rgba(192,38,211,0.25)); }
+.player-center { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 580px; }
+.player-controls { display: flex; align-items: center; gap: 14px; }
+.player-controls button { color: var(--text-secondary); font-size: 16px; padding: 6px; display: flex; align-items: center; justify-content: center; }
 .player-controls button:hover { color: white; transform: scale(1.15); }
 .player-controls button.active { color: var(--accent-secondary); }
-.player-controls .play-btn { width: 42px; height: 42px; background: white; color: #000 !important; border-radius: 50%; font-size: 16px; box-shadow: 0 5px 20px rgba(255,255,255,0.2); }
-.player-controls .play-btn:hover { transform: scale(1.1); }
+.player-controls .play-btn { width: 42px; height: 42px; background: white; color: #000 !important; border-radius: 50%; font-size: 16px; box-shadow: 0 5px 20px rgba(255,255,255,0.25); }
+.player-controls .play-btn:hover { transform: scale(1.1); box-shadow: 0 8px 25px rgba(255,255,255,0.4); }
 .progress-container { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .progress-container span { min-width: 35px; text-align: center; }
-.progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; position: relative; transition: height 0.2s; }
-.progress-bar:hover { height: 6px; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan-primary), var(--accent-secondary)); border-radius: 3px; width: 0%; position: relative; }
+.progress-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.12); border-radius: 4px; cursor: pointer; position: relative; transition: height 0.2s; }
+.progress-bar:hover { height: 7px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--player-accent-2, var(--cyan-primary)), var(--player-accent-1, var(--accent-secondary))); border-radius: 4px; width: 0%; position: relative; }
 .progress-fill::after { content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background: white; border-radius: 50%; opacity: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
 .progress-bar:hover .progress-fill::after { opacity: 1; }
 .player-right { display: flex; align-items: center; gap: 12px; width: 30%; justify-content: flex-end; color: var(--text-secondary); }
-.player-right i { cursor: pointer; font-size: 14px; }
-.player-right i:hover { color: white; }
-#volume-slider { width: 90px; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer; }
+.player-right i, .player-right button { cursor: pointer; font-size: 14px; color: var(--text-secondary); }
+.player-right i:hover, .player-right button:hover { color: white; }
+.quality-pill { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 9999px; background: rgba(34,211,238,0.15); color: var(--cyan-primary); border: 1px solid rgba(34,211,238,0.3); text-transform: uppercase; white-space: nowrap; }
+.player-speed-btn { font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+.player-speed-btn:hover { color: white; background: rgba(255,255,255,0.15); }
+#volume-slider { width: 85px; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer; }
 #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: white; border-radius: 50%; cursor: pointer; }
+
+/* FULLSCREEN ADAPTIVE PLAYER MODAL */
+#fullscreen-player-modal { position: fixed; inset: 0; z-index: 9990; background: rgba(8,3,18,0.96); backdrop-filter: blur(35px); display: none; flex-direction: column; padding: 20px 28px 25px; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
+#fullscreen-player-modal.show { display: flex; }
+.fp-backdrop-glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, var(--player-accent-1, #c026d3) 0%, transparent 60%), radial-gradient(circle at 80% 80%, var(--player-accent-2, #22d3ee) 0%, transparent 50%); opacity: 0.28; pointer-events: none; transition: background 0.8s ease; filter: blur(60px); }
+.fp-header { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; margin-bottom: 15px; }
+.fp-close-btn { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.08); color: white; display: flex; justify-content: center; align-items: center; font-size: 18px; border: 1px solid rgba(255,255,255,0.1); }
+.fp-close-btn:hover { background: var(--accent-primary); transform: scale(1.08); }
+.fp-header-title { text-align: center; }
+.fp-header-title h5 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin: 0; }
+.fp-header-title p { font-size: 14px; font-weight: 700; color: white; margin: 2px 0 0; }
+.fp-tabs { display: flex; justify-content: center; gap: 8px; position: relative; z-index: 2; margin-bottom: 15px; flex-wrap: wrap; }
+.fp-tab-btn { padding: 7px 16px; border-radius: 9999px; font-size: 12px; font-weight: 700; color: var(--text-secondary); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 6px; }
+.fp-tab-btn:hover { color: white; background: rgba(255,255,255,0.12); }
+.fp-tab-btn.active { color: white; background: linear-gradient(135deg, var(--player-accent-1, #c026d3), var(--player-accent-2, #22d3ee)); border-color: transparent; box-shadow: 0 4px 20px rgba(192,38,211,0.4); }
+.fp-body { flex: 1; position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; min-height: 0; overflow: hidden; }
+.fp-tab-pane { width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; }
+.fp-tab-pane.active { display: flex; }
+.vinyl-container { position: relative; width: min(300px, 46vh); aspect-ratio: 1; border-radius: 50%; background: #0a0a0c; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 50px var(--player-accent-1, rgba(192,38,211,0.35)); display: flex; justify-content: center; align-items: center; border: 6px solid #1a1a1f; animation: spin 20s linear infinite; animation-play-state: paused; }
+.vinyl-container.spinning { animation-play-state: running; }
+.vinyl-grooves { position: absolute; inset: 12px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.08); pointer-events: none; }
+.vinyl-grooves::before { content: ''; position: absolute; inset: 24px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.06); }
+.vinyl-art { width: 56%; height: 56%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 20px rgba(0,0,0,0.8); border: 3px solid rgba(255,255,255,0.25); }
+.vinyl-hole { position: absolute; width: 22px; height: 22px; background: #080312; border: 3px solid #333; border-radius: 50%; z-index: 5; }
+.fp-visualizer { display: flex; align-items: flex-end; justify-content: center; gap: 5px; height: 32px; margin-top: 18px; }
+.fp-visualizer span { width: 4px; height: 6px; background: linear-gradient(180deg, var(--player-accent-2, #22d3ee), var(--player-accent-1, #c026d3)); border-radius: 4px; transition: height 0.2s; opacity: 0.5; }
+.vinyl-container.spinning + .fp-visualizer span { animation: eqBar 0.9s ease-in-out infinite alternate; opacity: 1; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(2) { animation-delay: 0.15s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(3) { animation-delay: 0.3s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(4) { animation-delay: 0.45s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(5) { animation-delay: 0.2s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(6) { animation-delay: 0.6s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(7) { animation-delay: 0.1s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(8) { animation-delay: 0.35s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(9) { animation-delay: 0.5s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(10) { animation-delay: 0.25s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(11) { animation-delay: 0.4s; }
+.vinyl-container.spinning + .fp-visualizer span:nth-child(12) { animation-delay: 0.15s; }
+@keyframes eqBar { 0% { height: 6px; } 100% { height: 28px; } }
+.fp-lyrics-pane { max-width: 600px; width: 100%; height: 100%; overflow-y: auto; padding: 20px; text-align: center; line-height: 2.1; font-size: 16px; color: rgba(255,255,255,0.9); white-space: pre-wrap; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); }
+.fp-queue-pane { max-width: 600px; width: 100%; height: 100%; overflow-y: auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); }
+.queue-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: var(--transition); }
+.queue-item:hover { background: rgba(255,255,255,0.08); }
+.queue-item.active { background: rgba(192,38,211,0.2); border: 1px solid var(--accent-primary); }
+.queue-item img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+.queue-item-info { flex: 1; min-width: 0; }
+.queue-item-info h4 { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue-item-info p { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-footer { position: relative; z-index: 2; max-width: 640px; width: 100%; margin: 15px auto 0; display: flex; flex-direction: column; gap: 12px; }
+.fp-track-meta { display: flex; justify-content: space-between; align-items: center; }
+.fp-meta-text h2 { font-size: 20px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 440px; }
+.fp-meta-text p { font-size: 13px; color: var(--accent-secondary); font-weight: 600; }
+.fp-meta-actions { display: flex; align-items: center; gap: 12px; }
+.fp-meta-actions button { font-size: 18px; color: var(--text-secondary); }
+.fp-meta-actions button:hover { color: white; }
+.fp-meta-actions button.liked { color: var(--red-primary); }
+.fp-controls { display: flex; justify-content: center; align-items: center; gap: 18px; }
+.fp-controls button { color: var(--text-secondary); font-size: 18px; transition: var(--transition); }
+.fp-controls button:hover { color: white; transform: scale(1.15); }
+.fp-controls button.active { color: var(--accent-secondary); }
+.fp-controls .fp-play-btn { width: 58px; height: 58px; border-radius: 50%; background: white; color: #000 !important; font-size: 22px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(255,255,255,0.3); }
+.fp-controls .fp-play-btn:hover { transform: scale(1.1); box-shadow: 0 12px 35px rgba(255,255,255,0.45); }
+.fp-extra-tools { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding: 0 5px; }
+.fp-vol-group { display: flex; align-items: center; gap: 10px; }
+.fp-vol-group input { width: 100px; }
+
+/* BAND SEARCH FILTER & LOAD MORE */
+.band-search-filter { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 8px 18px; display: flex; align-items: center; gap: 10px; min-width: 260px; max-width: 380px; }
+.band-search-filter:focus-within { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(192,38,211,0.3); }
+.band-search-filter input { color: white; font-size: 13px; flex: 1; }
+.load-more-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin: 20px auto 35px; padding: 12px 28px; background: linear-gradient(135deg, rgba(192,38,211,0.25), rgba(34,211,238,0.25)); border: 1px solid rgba(192,38,211,0.5); border-radius: 9999px; color: white; font-size: 14px; font-weight: 700; transition: var(--transition); }
+.load-more-btn:hover { background: linear-gradient(135deg, #c026d3, #22d3ee); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(192,38,211,0.4); }
 
 #lyrics-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 5000; padding: 20px; }
 #lyrics-modal.show { display: flex; animation: fadeIn 0.3s; }
@@ -478,6 +559,7 @@ img, video { display: block; max-width: 100%; }
         <div class="nav-item" data-nav="anime"><i class="fas fa-dragon"></i><span>Tema Anime</span></div>
         <div class="nav-divider"></div>
         <div class="playlist-label">Genre Populer</div>
+        <div class="nav-item" data-playlist="anime"><i class="fas fa-torii-gate"></i><span>Anime & J-Music</span></div>
         <div class="nav-item" data-playlist="indo"><i class="fas fa-fire"></i><span>Indonesia</span></div>
         <div class="nav-item" data-playlist="world"><i class="fas fa-globe"></i><span>Dunia</span></div>
         <div class="nav-item" data-playlist="rock"><i class="fas fa-guitar"></i><span>Rock</span></div>
@@ -524,6 +606,7 @@ img, video { display: block; max-width: 100%; }
             </div>
             <div class="category-pills" id="category-pills">
                 <button class="category-pill active" data-cat="all">🎵 Semua</button>
+                <button class="category-pill" data-cat="anime">⛩️ Anime & J-Music</button>
                 <button class="category-pill" data-cat="indo">🇮🇩 Indonesia</button>
                 <button class="category-pill" data-cat="world">🌍 Dunia</button>
                 <button class="category-pill" data-cat="rock">🎸 Rock</button>
@@ -542,9 +625,19 @@ img, video { display: block; max-width: 100%; }
         <div id="band-detail-view" class="band-detail">
             <button class="back-btn" onclick="window.Goyzfy.showHome()"><i class="fas fa-arrow-left"></i> Kembali</button>
             <div class="band-header" id="band-header"></div>
-            <div class="section-title"><span id="band-songs-title">🎵 Semua Lagu</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:25px 0 15px;">
+                <div class="section-title" style="margin:0;"><span id="band-songs-title">🎵 Semua Lagu</span></div>
+                <div class="band-search-filter">
+                    <i class="fas fa-search" style="color:var(--text-secondary);font-size:13px;"></i>
+                    <input type="text" id="band-song-filter" placeholder="Cari di lagu band ini..." autocomplete="off">
+                    <button id="clear-band-filter" style="display:none;color:var(--text-secondary);font-size:12px;"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
             <div class="song-grid" id="band-songs-grid">
                 <div class="loading-state"><i class="fas fa-spinner"></i> Memuat lagu...</div>
+            </div>
+            <div id="load-more-container" style="text-align:center;display:none;margin-top:10px;">
+                <button class="load-more-btn" id="load-more-songs-btn"><i class="fas fa-plus-circle"></i> Muat Lebih Banyak Lagu (Halaman <span id="next-page-num">2</span>)</button>
             </div>
         </div>
 
@@ -566,25 +659,28 @@ img, video { display: block; max-width: 100%; }
         </div>
     </main>
 
-    <div class="player-bar">
-        <div class="now-playing" id="now-playing">
+    <div class="player-bar" id="player-bar">
+        <div class="now-playing" id="now-playing" title="Klik untuk membuka pemutar penuh">
             <div class="cover-wrap">
                 <img id="player-img" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy" alt="Cover">
                 <div class="now-playing-eq"><span></span><span></span><span></span><span></span></div>
+                <div class="expand-hint"><i class="fas fa-chevron-up"></i></div>
             </div>
             <div class="now-playing-info">
                 <h4 id="player-title">Belum ada lagu</h4>
                 <p id="player-artist">Pilih lagu untuk diputar</p>
             </div>
-            <i class="far fa-heart like-btn" id="like-btn"></i>
+            <i class="far fa-heart like-btn" id="like-btn" title="Sukai lagu"></i>
         </div>
         <div class="player-center">
             <div class="player-controls">
-                <button id="shuffle-btn"><i class="fas fa-random"></i></button>
-                <button id="prev-btn"><i class="fas fa-step-backward"></i></button>
-                <button class="play-btn" id="play-btn"><i class="fas fa-play"></i></button>
-                <button id="next-btn"><i class="fas fa-step-forward"></i></button>
-                <button id="repeat-btn"><i class="fas fa-redo"></i></button>
+                <button id="shuffle-btn" title="Acak Lagu"><i class="fas fa-random"></i></button>
+                <button id="prev-btn" title="Lagu Sebelumnya"><i class="fas fa-step-backward"></i></button>
+                <button id="rewind-btn" title="Mundur 10 Detik"><i class="fas fa-rotate-left"></i></button>
+                <button class="play-btn" id="play-btn" title="Putar / Jeda"><i class="fas fa-play"></i></button>
+                <button id="forward-btn" title="Maju 10 Detik"><i class="fas fa-rotate-right"></i></button>
+                <button id="next-btn" title="Lagu Selanjutnya"><i class="fas fa-step-forward"></i></button>
+                <button id="repeat-btn" title="Ulangi Lagu"><i class="fas fa-redo"></i></button>
             </div>
             <div class="progress-container">
                 <span id="current-time">0:00</span>
@@ -593,9 +689,111 @@ img, video { display: block; max-width: 100%; }
             </div>
         </div>
         <div class="player-right">
-            <i class="fas fa-microphone-lines" id="lyrics-btn"></i>
-            <i class="fas fa-volume-up" id="volume-icon"></i>
-            <input type="range" id="volume-slider" min="0" max="100" value="80">
+            <span class="quality-pill" id="quality-pill"><i class="fas fa-bolt"></i> HD 320k</span>
+            <button class="player-speed-btn" id="speed-btn" title="Kecepatan Putar">1.0x</button>
+            <i class="fas fa-microphone-lines" id="lyrics-btn" title="Lihat Lirik"></i>
+            <i class="fas fa-list-ul" id="queue-btn" title="Daftar Putar"></i>
+            <i class="fas fa-volume-up" id="volume-icon" title="Volume"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="80" title="Atur Volume">
+            <button id="expand-player-btn" title="Buka Pemutar Penuh" style="padding:6px;font-size:15px;color:var(--text-secondary);"><i class="fas fa-up-right-and-down-left-from-center"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- FULLSCREEN / ADAPTIVE EXPANDED PLAYER -->
+<div id="fullscreen-player-modal">
+    <div class="fp-backdrop-glow" id="fp-backdrop-glow"></div>
+    <div class="fp-header">
+        <button class="fp-close-btn" id="fp-close-btn" title="Tutup Pemutar Penuh"><i class="fas fa-chevron-down"></i></button>
+        <div class="fp-header-title">
+            <h5>SEDANG MEMUTAR DARI</h5>
+            <p id="fp-band-title">Goyzfy Music</p>
+        </div>
+        <div class="quality-pill"><i class="fas fa-sparkles"></i> 320 KBPS HD</div>
+    </div>
+    
+    <div class="fp-tabs">
+        <button class="fp-tab-btn active" data-fptab="player"><i class="fas fa-compact-disc"></i> Pemutar</button>
+        <button class="fp-tab-btn" data-fptab="lyrics"><i class="fas fa-microphone-lines"></i> Lirik</button>
+        <button class="fp-tab-btn" data-fptab="queue"><i class="fas fa-list-ul"></i> Antrean (<span id="fp-queue-count">0</span>)</button>
+        <button class="fp-tab-btn" data-fptab="artist"><i class="fas fa-user"></i> Info Band</button>
+    </div>
+
+    <div class="fp-body">
+        <!-- VINYL / PLAYER TAB -->
+        <div class="fp-tab-pane active" id="fp-tab-player">
+            <div class="vinyl-container" id="vinyl-disc">
+                <div class="vinyl-grooves"></div>
+                <img class="vinyl-art" id="fp-cover-img" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Goyzfy" alt="Album Cover">
+                <div class="vinyl-hole"></div>
+            </div>
+            <div class="fp-visualizer" id="fp-visualizer">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- LYRICS TAB -->
+        <div class="fp-tab-pane" id="fp-tab-lyrics">
+            <div class="fp-lyrics-pane" id="fp-lyrics-content">
+                <div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Pilih lagu untuk melihat lirik</p></div>
+            </div>
+        </div>
+
+        <!-- QUEUE TAB -->
+        <div class="fp-tab-pane" id="fp-tab-queue">
+            <div class="fp-queue-pane" id="fp-queue-list"></div>
+        </div>
+
+        <!-- ARTIST INFO TAB -->
+        <div class="fp-tab-pane" id="fp-tab-artist">
+            <div id="fp-artist-card" style="text-align:center; max-width:480px; width:100%; padding:24px; background:rgba(255,255,255,0.04); border-radius:24px; border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(10px);">
+                <img id="fp-artist-photo" src="" style="width:130px;height:130px;border-radius:50%;margin:0 auto 15px;object-fit:cover;border:3px solid var(--accent-primary);box-shadow:0 0 30px rgba(192,38,211,0.5);">
+                <h3 id="fp-artist-name" style="font-size:22px;font-weight:800;margin-bottom:6px;">Nama Band</h3>
+                <p id="fp-artist-genre" style="color:var(--accent-secondary);font-weight:600;font-size:13px;margin-bottom:12px;">Pop Rock • Indonesia</p>
+                <p id="fp-artist-desc" style="color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:15px;"></p>
+                <div id="fp-artist-hits" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL PLAYER FOOTER -->
+    <div class="fp-footer">
+        <div class="fp-track-meta">
+            <div class="fp-meta-text">
+                <h2 id="fp-title">Belum ada lagu</h2>
+                <p id="fp-artist">Pilih lagu untuk diputar</p>
+            </div>
+            <div class="fp-meta-actions">
+                <button id="fp-like-btn" title="Sukai lagu"><i class="far fa-heart"></i></button>
+                <button id="fp-copy-link-btn" title="Salin Judul Lagu"><i class="fas fa-copy"></i></button>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <span id="fp-current-time">0:00</span>
+            <div class="progress-bar" id="fp-progress-bar"><div class="progress-fill" id="fp-progress-fill"></div></div>
+            <span id="fp-total-time">0:00</span>
+        </div>
+
+        <div class="fp-controls">
+            <button id="fp-shuffle-btn" title="Acak Lagu"><i class="fas fa-random"></i></button>
+            <button id="fp-prev-btn" title="Lagu Sebelumnya"><i class="fas fa-step-backward"></i></button>
+            <button id="fp-rewind-btn" title="Mundur 10s"><i class="fas fa-rotate-left"></i></button>
+            <button class="fp-play-btn" id="fp-play-btn" title="Putar / Jeda"><i class="fas fa-play"></i></button>
+            <button id="fp-forward-btn" title="Maju 10s"><i class="fas fa-rotate-right"></i></button>
+            <button id="fp-next-btn" title="Lagu Selanjutnya"><i class="fas fa-step-forward"></i></button>
+            <button id="fp-repeat-btn" title="Ulangi Lagu"><i class="fas fa-redo"></i></button>
+        </div>
+
+        <div class="fp-extra-tools">
+            <div class="fp-vol-group">
+                <i class="fas fa-volume-up" id="fp-vol-icon"></i>
+                <input type="range" id="fp-vol-slider" min="0" max="100" value="80">
+            </div>
+            <div style="display:flex;align-items:center;gap:15px;">
+                <button class="player-speed-btn" id="fp-speed-btn">1.0x</button>
+                <button id="fp-lyrics-quick-btn" title="Buka Tab Lirik" style="color:var(--text-secondary);"><i class="fas fa-microphone-lines"></i></button>
+            </div>
         </div>
     </div>
 </div>
@@ -738,56 +936,73 @@ function makeBandSVG(shortName, color1, color2, color3, icon, pattern) {
 }
 
 // ============ BAND DATABASE ============
+// Setiap band memiliki thumbnail gambar asli (verified high-res Deezer/artist CDN)
 const BANDS = [
-    { id: 'iwanfals', name: 'Iwan Fals', short: 'IWAN', genre: 'Pop Rock', country: 'Indonesia', year: 1961, icon: '🎤', color1: '#dc2626', color2: '#f59e0b', color3: '#7c2d12', pattern: 'LEGENDA', query: 'Iwan Fals', songs: ['Jendela Kelas 1', 'Bento', 'Ibu', 'Wakil Rakyat'] },
-    { id: 'sheilaon7', name: 'Sheila On 7', short: 'SO7', genre: 'Pop Rock', country: 'Indonesia', year: 1996, icon: '🎸', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'YOGYAKARTA', query: 'Sheila On 7', songs: ['Dan', 'Kita', 'Sephia'] },
-    { id: 'dewa19', name: 'Dewa 19', short: 'DEWA19', genre: 'Rock', country: 'Indonesia', year: 1986, icon: '🎸', color1: '#0891b2', color2: '#7c3aed', color3: '#164e63', pattern: 'SURABAYA', query: 'Dewa 19', songs: ['Kangen', 'Pupus', 'Separuh Nafas'] },
-    { id: 'noah', name: 'Noah', short: 'NOAH', genre: 'Pop Rock', country: 'Indonesia', year: 2000, icon: '🎸', color1: '#2563eb', color2: '#06b6d4', color3: '#1e3a8a', pattern: 'BANDUNG', query: 'Noah', songs: ['Separuh Aku', 'Mungkin Nanti'] },
-    { id: 'peterpan', name: 'Peterpan', short: 'PETERPAN', genre: 'Pop Rock', country: 'Indonesia', year: 2000, icon: '🎸', color1: '#059669', color2: '#10b981', color3: '#064e3b', pattern: 'CLASSIC', query: 'Peterpan', songs: ['Mungkin Nanti', 'Bintang di Surga'] },
-    { id: 'tulus', name: 'Tulus', short: 'TULUS', genre: 'Pop / Jazz', country: 'Indonesia', year: 1987, icon: '🎤', color1: '#1e40af', color2: '#0891b2', color3: '#0c4a6e', pattern: 'SUARA EMAS', query: 'Tulus', songs: ['Monokrom', 'Pamit', 'Hati-Hati di Jalan'] },
-    { id: 'pamungkas', name: 'Pamungkas', short: 'PAMUNGKAS', genre: 'Indie Pop', country: 'Indonesia', year: 1993, icon: '🎸', color1: '#be185d', color2: '#f59e0b', color3: '#7c2d12', pattern: 'INDIE', query: 'Pamungkas', songs: ['To the Bone', 'Kenangan Manis'] },
-    { id: 'fourtwnty', name: 'Fourtwnty', short: 'FOURTWNTY', genre: 'Indie Folk', country: 'Indonesia', year: 2010, icon: '🌿', color1: '#15803d', color2: '#84cc16', color3: '#14532d', pattern: 'FOLK', query: 'Fourtwnty', songs: ['Zona Nyaman', 'Fana Merah Jambu'] },
-    { id: 'payungteduh', name: 'Payung Teduh', short: 'PAYUNG', genre: 'Indie Folk', country: 'Indonesia', year: 2007, icon: '☂️', color1: '#0d9488', color2: '#059669', color3: '#134e4a', pattern: 'AKUSTIK', query: 'Payung Teduh', songs: ['Akad', 'Resah'] },
-    { id: 'raisa', name: 'Raisa', short: 'RAISA', genre: 'Pop', country: 'Indonesia', year: 1990, icon: '🎤', color1: '#be123c', color2: '#ec4899', color3: '#831843', pattern: 'DIVA POP', query: 'Raisa', songs: ['Could Have Been', 'Serba Salah'] },
-    { id: 'andmesh', name: 'Andmesh', short: 'ANDMESH', genre: 'Pop', country: 'Indonesia', year: 1997, icon: '🎤', color1: '#7c2d12', color2: '#ea580c', color3: '#431407', pattern: 'SUARA KHAS', query: 'Andmesh', songs: ['Hanya Rindu'] },
-    { id: 'armada', name: 'Armada', short: 'ARMADA', genre: 'Pop', country: 'Indonesia', year: 2007, icon: '🎸', color1: '#4338ca', color2: '#7c3aed', color3: '#1e1b4b', pattern: 'POP ROCK', query: 'Armada', songs: ['Asal Kau Bahagia'] },
-    { id: 'ungu', name: 'Ungu', short: 'UNGU', genre: 'Pop Rock', country: 'Indonesia', year: 1996, icon: '🎸', color1: '#7e22ce', color2: '#a855f7', color3: '#581c87', pattern: 'PURPLE', query: 'Ungu', songs: ['Kekasih Gelapku', 'Demi Waktu'] },
-    { id: 'padi', name: 'Padi', short: 'PADI', genre: 'Pop Rock', country: 'Indonesia', year: 1997, icon: '🎸', color1: '#166534', color2: '#22c55e', color3: '#14532d', pattern: 'POP ROCK', query: 'Padi', songs: ['Kasih Tak Sampai'] },
-    { id: 'radja', name: 'Radja', short: 'RADJA', genre: 'Pop Rock', country: 'Indonesia', year: 2001, icon: '🎸', color1: '#c2410c', color2: '#f97316', color3: '#7c2d12', pattern: 'BAND POP', query: 'Radja', songs: ['Jujur', 'Tulus'] },
-    { id: 'virgoun', name: 'Virgoun', short: 'VIRGOUN', genre: 'Pop', country: 'Indonesia', year: 1986, icon: '🎤', color1: '#0e7490', color2: '#06b6d4', color3: '#164e63', pattern: 'LAST CHILD', query: 'Virgoun', songs: ['Surat Cinta Untuk Starla', 'Bukti'] },
-    { id: 'judika', name: 'Judika', short: 'JUDIKA', genre: 'Pop', country: 'Indonesia', year: 1978, icon: '🎤', color1: '#831843', color2: '#ec4899', color3: '#500724', pattern: 'POWER', query: 'Judika', songs: ['Bukan Dia Tapi Aku'] },
-    { id: 'rossa', name: 'Rossa', short: 'ROSSA', genre: 'Pop', country: 'Indonesia', year: 1978, icon: '🎤', color1: '#7e1d3f', color2: '#db2777', color3: '#4c0519', pattern: 'DIVA', query: 'Rossa', songs: ['Hati Yang Kau Sakiti'] },
-    { id: 'glennfredly', name: 'Glenn Fredly', short: 'GLENN', genre: 'Pop / R&B', country: 'Indonesia', year: 1975, icon: '🎤', color1: '#1e3a8a', color2: '#0ea5e9', color3: '#172554', pattern: 'R&B LEGEND', query: 'Glenn Fredly', songs: ['Januari'] },
-    { id: 'feast', name: '.Feast', short: '.FEAST', genre: 'Indie Rock', country: 'Indonesia', year: 2012, icon: '🔥', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'INDIE ROCK', query: '.Feast', songs: ['Gugur Bunga', 'Peradaban'] },
-    { id: 'efekrumahkaca', name: 'Efek Rumah Kaca', short: 'ERK', genre: 'Indie Rock', country: 'Indonesia', year: 2001, icon: '🏠', color1: '#0f766e', color2: '#14b8a6', color3: '#134e4a', pattern: 'ART ROCK', query: 'Efek Rumah Kaca', songs: ['Cinta Melulu'] },
-    { id: 'hindia', name: 'Hindia', short: 'HINDIA', genre: 'Indie Pop', country: 'Indonesia', year: 2018, icon: '🌊', color1: '#0369a1', color2: '#38bdf8', color3: '#075985', pattern: 'INDIE POP', query: 'Hindia', songs: ['Evaluasi'] },
-    { id: 'juicyluicy', name: 'Juicy Luicy', short: 'JUICY', genre: 'Pop', country: 'Indonesia', year: 2015, icon: '🍊', color1: '#c2410c', color2: '#fb923c', color3: '#7c2d12', pattern: 'POP MANIS', query: 'Juicy Luicy', songs: ['Lantas', 'Halu'] },
-    { id: 'nadinamizah', name: 'Nadin Amizah', short: 'NADIN', genre: 'Folk Pop', country: 'Indonesia', year: 2000, icon: '🌸', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'FOLK POP', query: 'Nadin Amizah', songs: ['Bertaut'] },
-    { id: 'mahalini', name: 'Mahalini', short: 'MAHALINI', genre: 'Pop', country: 'Indonesia', year: 2000, icon: '🎤', color1: '#7c3aed', color2: '#c084fc', color3: '#4c1d95', pattern: 'POP BALI', query: 'Mahalini', songs: ['Sial'] },
-    { id: 'lyodra', name: 'Lyodra', short: 'LYODRA', genre: 'Pop', country: 'Indonesia', year: 2003, icon: '🎤', color1: '#9d174d', color2: '#f472b6', color3: '#500724', pattern: 'DIVA MUDA', query: 'Lyodra', songs: ['Pesan Terakhir'] },
-    { id: 'coldplay', name: 'Coldplay', short: 'COLDPLAY', genre: 'Alt Rock', country: 'UK', year: 1996, icon: '🌟', color1: '#1e40af', color2: '#fbbf24', color3: '#172554', pattern: 'LONDON', query: 'Coldplay', songs: ['Yellow', 'Fix You', 'Viva la Vida'] },
-    { id: 'linkinpark', name: 'Linkin Park', short: 'LP', genre: 'Nu Metal', country: 'USA', year: 1996, icon: '🔥', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'NU METAL', query: 'Linkin Park', songs: ['Numb', 'In the End'] },
-    { id: 'brunomars', name: 'Bruno Mars', short: 'BRUNO', genre: 'Pop R&B', country: 'USA', year: 1985, icon: '🎤', color1: '#b91c1c', color2: '#f59e0b', color3: '#7c2d12', pattern: 'POP STAR', query: 'Bruno Mars', songs: ['Just the Way You Are', 'Grenade'] },
-    { id: 'edsheeran', name: 'Ed Sheeran', short: 'ED', genre: 'Pop Folk', country: 'UK', year: 1991, icon: '🎸', color1: '#ea580c', color2: '#fbbf24', color3: '#7c2d12', pattern: 'FOLK POP', query: 'Ed Sheeran', songs: ['Shape of You', 'Perfect'] },
-    { id: 'taylorswift', name: 'Taylor Swift', short: 'TAYLOR', genre: 'Pop', country: 'USA', year: 1989, icon: '✨', color1: '#9333ea', color2: '#f472b6', color3: '#4c1d95', pattern: 'POP QUEEN', query: 'Taylor Swift', songs: ['Love Story', 'Shake It Off'] },
-    { id: 'adele', name: 'Adele', short: 'ADELE', genre: 'Soul Pop', country: 'UK', year: 1988, icon: '🎤', color1: '#7c2d12', color2: '#f59e0b', color3: '#450a0a', pattern: 'SOUL VOICE', query: 'Adele', songs: ['Rolling in the Deep', 'Hello'] },
-    { id: 'queen', name: 'Queen', short: 'QUEEN', genre: 'Classic Rock', country: 'UK', year: 1970, icon: '👑', color1: '#7c3aed', color2: '#fbbf24', color3: '#4c1d95', pattern: 'LEGEND', query: 'Queen', songs: ['Bohemian Rhapsody', 'We Will Rock You'] },
-    { id: 'maroon5', name: 'Maroon 5', short: 'M5', genre: 'Pop Rock', country: 'USA', year: 1994, icon: '🎸', color1: '#be123c', color2: '#f97316', color3: '#831843', pattern: 'POP ROCK', query: 'Maroon 5', songs: ['Sugar', 'Memories'] },
-    { id: 'imaginedragons', name: 'Imagine Dragons', short: 'ID', genre: 'Alt Rock', country: 'USA', year: 2008, icon: '🐉', color1: '#991b1b', color2: '#dc2626', color3: '#450a0a', pattern: 'ALT ROCK', query: 'Imagine Dragons', songs: ['Believer', 'Thunder'] },
-    { id: 'theweeknd', name: 'The Weeknd', short: 'WEEKND', genre: 'R&B Pop', country: 'Canada', year: 1990, icon: '🌙', color1: '#831843', color2: '#db2777', color3: '#500724', pattern: 'R&B POP', query: 'The Weeknd', songs: ['Blinding Lights'] },
-    { id: 'billieeilish', name: 'Billie Eilish', short: 'BILLIE', genre: 'Alt Pop', country: 'USA', year: 2001, icon: '💚', color1: '#166534', color2: '#84cc16', color3: '#14532d', pattern: 'ALT POP', query: 'Billie Eilish', songs: ['Bad Guy'] },
-    { id: 'arianagrande', name: 'Ariana Grande', short: 'ARIANA', genre: 'Pop', country: 'USA', year: 1993, icon: '🎤', color1: '#7e22ce', color2: '#c084fc', color3: '#581c87', pattern: 'POP STAR', query: 'Ariana Grande', songs: ['7 Rings'] },
-    { id: 'justinbieber', name: 'Justin Bieber', short: 'JB', genre: 'Pop', country: 'Canada', year: 1994, icon: '🎤', color1: '#0369a1', color2: '#38bdf8', color3: '#0c4a6e', pattern: 'POP STAR', query: 'Justin Bieber', songs: ['Baby', 'Sorry'] },
-    { id: 'dualipa', name: 'Dua Lipa', short: 'DUA', genre: 'Pop Disco', country: 'UK', year: 1995, icon: '💃', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'DISCO POP', query: 'Dua Lipa', songs: ['New Rules'] },
-    { id: 'eminem', name: 'Eminem', short: 'EMINEM', genre: 'Hip Hop', country: 'USA', year: 1972, icon: '🎤', color1: '#1e293b', color2: '#334155', color3: '#0f172a', pattern: 'RAP GOD', query: 'Eminem', songs: ['Lose Yourself'] },
-    { id: 'michaeljackson', name: 'Michael Jackson', short: 'MJ', genre: 'Pop Soul', country: 'USA', year: 1958, icon: '👑', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'KING', query: 'Michael Jackson', songs: ['Billie Jean', 'Thriller'] },
-    { id: 'thebeatles', name: 'The Beatles', short: 'BEATLES', genre: 'Classic Rock', country: 'UK', year: 1960, icon: '🎸', color1: '#1e40af', color2: '#dc2626', color3: '#172554', pattern: 'LIVERPOOL', query: 'The Beatles', songs: ['Hey Jude', 'Let It Be'] },
-    { id: 'nirvana', name: 'Nirvana', short: 'NIRVANA', genre: 'Grunge', country: 'USA', year: 1987, icon: '🎸', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'GRUNGE', query: 'Nirvana', songs: ['Smells Like Teen Spirit'] },
-    { id: 'metallica', name: 'Metallica', short: 'METALLICA', genre: 'Metal', country: 'USA', year: 1981, icon: '🎸', color1: '#1e293b', color2: '#dc2626', color3: '#0f172a', pattern: 'METAL', query: 'Metallica', songs: ['Nothing Else Matters'] },
-    { id: 'gunsnroses', name: "Guns N' Roses", short: 'GNR', genre: 'Hard Rock', country: 'USA', year: 1985, icon: '🌹', color1: '#991b1b', color2: '#f59e0b', color3: '#450a0a', pattern: 'HARD ROCK', query: 'Guns N Roses', songs: ["Sweet Child O' Mine"] },
-    { id: 'acdc', name: 'AC/DC', short: 'ACDC', genre: 'Hard Rock', country: 'Australia', year: 1973, icon: '⚡', color1: '#7f1d1d', color2: '#fbbf24', color3: '#450a0a', pattern: 'HARD ROCK', query: 'ACDC', songs: ['Back in Black'] },
-    { id: 'bts', name: 'BTS', short: 'BTS', genre: 'K-Pop', country: 'Korea', year: 2013, icon: '💜', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'K-POP', query: 'BTS', songs: ['Dynamite', 'Butter'] },
-    { id: 'blackpink', name: 'BLACKPINK', short: 'BPINK', genre: 'K-Pop', country: 'Korea', year: 2016, icon: '🖤', color1: '#be185d', color2: '#1e293b', color3: '#831843', pattern: 'K-POP', query: 'BLACKPINK', songs: ['How You Like That'] }
+    // INDONESIAN LEGENDS & BANDS
+    { id: 'iwanfals', name: 'Iwan Fals', short: 'IWAN', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 1961, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/67e1cc40e52d0efaed3032eea03cab8e/500x500-000000-80-0-0.jpg', color1: '#dc2626', color2: '#f59e0b', color3: '#7c2d12', pattern: 'LEGENDA', query: 'Iwan Fals', songs: ['Jendela Kelas 1', 'Bento', 'Ibu', 'Wakil Rakyat', 'Bongkar', 'Surat Buat Wakil Rakyat'] },
+    { id: 'sheilaon7', name: 'Sheila On 7', short: 'SO7', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 1996, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/9e6cc50e80a7dcb4dacc7eb15427335b/500x500-000000-80-0-0.jpg', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'YOGYAKARTA', query: 'Sheila On 7', songs: ['Dan', 'Kita', 'Sephia', 'Hari Bersamanya', 'Melompat Lebih Tinggi', 'Anugerah Terindah'] },
+    { id: 'dewa19', name: 'Dewa 19', short: 'DEWA19', genre: 'Rock', country: 'Indonesia', category: 'indo', year: 1986, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/7164efb4540b482dd5abac8bff423429/500x500-000000-80-0-0.jpg', color1: '#0891b2', color2: '#7c3aed', color3: '#164e63', pattern: 'SURABAYA', query: 'Dewa 19', songs: ['Kangen', 'Pupus', 'Separuh Nafas', 'Risalah Hati', 'Roman Picisan', 'Cinta Gila'] },
+    { id: 'noah', name: 'Noah', short: 'NOAH', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 2000, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/e43ae0c4354a6afe58ae0b0cfad05f19/500x500-000000-80-0-0.jpg', color1: '#2563eb', color2: '#06b6d4', color3: '#1e3a8a', pattern: 'BANDUNG', query: 'Noah', songs: ['Separuh Aku', 'Mungkin Nanti', 'Menghapus Jejakmu', 'Yang Terdalam', 'Kala Cinta Menggoda'] },
+    { id: 'peterpan', name: 'Peterpan', short: 'PETERPAN', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 2000, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/f0ad845a2982590f9a12c6957f928d67/500x500-000000-80-0-0.jpg', color1: '#059669', color2: '#10b981', color3: '#064e3b', pattern: 'CLASSIC', query: 'Peterpan', songs: ['Mungkin Nanti', 'Bintang di Surga', 'Ada Apa Denganmu', 'Semua Tentang Kita', 'Topeng'] },
+    { id: 'tulus', name: 'Tulus', short: 'TULUS', genre: 'Pop / Jazz', country: 'Indonesia', category: 'indo', year: 1987, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/1fecff61b191427ec4d2760a77527bf5/500x500-000000-80-0-0.jpg', color1: '#1e40af', color2: '#0891b2', color3: '#0c4a6e', pattern: 'SUARA EMAS', query: 'Tulus', songs: ['Monokrom', 'Pamit', 'Hati-Hati di Jalan', 'Gajah', 'Sepatu', 'Diri'] },
+    { id: 'pamungkas', name: 'Pamungkas', short: 'PAMUNGKAS', genre: 'Indie Pop', country: 'Indonesia', category: 'indo', year: 1993, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/cf78395171e26a522ba28f4d41b5b6bc/500x500-000000-80-0-0.jpg', color1: '#be185d', color2: '#f59e0b', color3: '#7c2d12', pattern: 'INDIE', query: 'Pamungkas', songs: ['To the Bone', 'Kenangan Manis', 'I Love You but I\'m Letting Go', 'Only One'] },
+    { id: 'fourtwnty', name: 'Fourtwnty', short: 'FOURTWNTY', genre: 'Indie Folk', country: 'Indonesia', category: 'indo', year: 2010, icon: '🌿', image: 'https://cdn-images.dzcdn.net/images/artist/5ef14df8afed38e82e07143abf300185/500x500-000000-80-0-0.jpg', color1: '#15803d', color2: '#84cc16', color3: '#14532d', pattern: 'FOLK', query: 'Fourtwnty', songs: ['Zona Nyaman', 'Fana Merah Jambu', 'Aku Tenang', 'Kusut'] },
+    { id: 'payungteduh', name: 'Payung Teduh', short: 'PAYUNG', genre: 'Indie Folk', country: 'Indonesia', category: 'indo', year: 2007, icon: '☂️', image: 'https://cdn-images.dzcdn.net/images/artist/a286726bf6f34d79e3f627d4b285132b/500x500-000000-80-0-0.jpg', color1: '#0d9488', color2: '#059669', color3: '#134e4a', pattern: 'AKUSTIK', query: 'Payung Teduh', songs: ['Akad', 'Resah', 'Menuju Senja', 'Untuk Perempuan Yang Sedang Dalam Pelukan'] },
+    { id: 'raisa', name: 'Raisa', short: 'RAISA', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 1990, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/264c09078b475136ec7eef6431678f33/500x500-000000-80-0-0.jpg', color1: '#be123c', color2: '#ec4899', color3: '#831843', pattern: 'DIVA POP', query: 'Raisa', songs: ['Could Have Been', 'Serba Salah', 'Kali Kedua', 'Mantan Terindah'] },
+    { id: 'andmesh', name: 'Andmesh', short: 'ANDMESH', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 1997, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/057744954b054cdb9fcdf59bf56c4b2b/500x500-000000-80-0-0.jpg', color1: '#7c2d12', color2: '#ea580c', color3: '#431407', pattern: 'SUARA KHAS', query: 'Andmesh', songs: ['Hanya Rindu', 'Cinta Luar Biasa', 'Kumau Dia', 'Nyaman'] },
+    { id: 'armada', name: 'Armada', short: 'ARMADA', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 2007, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/f85be33b944a3e7fca450f9f17464fea/500x500-000000-80-0-0.jpg', color1: '#4338ca', color2: '#7c3aed', color3: '#1e1b4b', pattern: 'POP ROCK', query: 'Armada', songs: ['Asal Kau Bahagia', 'Pergi Pagi Pulang Pagi', 'Harusnya Aku', 'Mau Dibawa Kemana'] },
+    { id: 'ungu', name: 'Ungu', short: 'UNGU', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 1996, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/9fff4eabef1a2961eb11b743009cfa22/500x500-000000-80-0-0.jpg', color1: '#7e22ce', color2: '#a855f7', color3: '#581c87', pattern: 'PURPLE', query: 'Ungu', songs: ['Kekasih Gelapku', 'Demi Waktu', 'Tercipta Untukku', 'Cinta Dalam Hati'] },
+    { id: 'padi', name: 'Padi', short: 'PADI', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 1997, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/bc40c7d63daa0874a65a3e55888edeb9/500x500-000000-80-0-0.jpg', color1: '#166534', color2: '#22c55e', color3: '#14532d', pattern: 'POP ROCK', query: 'Padi', songs: ['Kasih Tak Sampai', 'Sobat', 'Semua Tak Sama', 'Begitu Indah', 'Menanti Sebuah Jawaban'] },
+    { id: 'radja', name: 'Radja', short: 'RADJA', genre: 'Pop Rock', country: 'Indonesia', category: 'indo', year: 2001, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/7c5e0ab9045dfa5fc7308f87f3c8747d/500x500-000000-80-0-0.jpg', color1: '#c2410c', color2: '#f97316', color3: '#7c2d12', pattern: 'BAND POP', query: 'Radja', songs: ['Jujur', 'Tulus', 'Yakin', 'Cinderella', 'Benci Bilang Cinta'] },
+    { id: 'virgoun', name: 'Virgoun', short: 'VIRGOUN', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 1986, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/f3f50a8a87e0eed15d32ccef59d91905/500x500-000000-80-0-0.jpg', color1: '#0e7490', color2: '#06b6d4', color3: '#164e63', pattern: 'LAST CHILD', query: 'Virgoun', songs: ['Surat Cinta Untuk Starla', 'Bukti', 'Saat Kau Telah Mengerti', 'Selamat (Selamat Tinggal)'] },
+    { id: 'judika', name: 'Judika', short: 'JUDIKA', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 1978, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/160eabec2b97b03c67fd8644b0a3d22b/500x500-000000-80-0-0.jpg', color1: '#831843', color2: '#ec4899', color3: '#500724', pattern: 'POWER', query: 'Judika', songs: ['Bukan Dia Tapi Aku', 'Jikalau Kau Cinta', 'Aku Yang Tersakiti', 'Putus Atau Terus'] },
+    { id: 'rossa', name: 'Rossa', short: 'ROSSA', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 1978, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/955ff2602d96003e11be0b4ca352fd3f/500x500-000000-80-0-0.jpg', color1: '#7e1d3f', color2: '#db2777', color3: '#4c0519', pattern: 'DIVA', query: 'Rossa', songs: ['Hati Yang Kau Sakiti', 'Tegar', 'Ayat-Ayat Cinta', 'Pudar'] },
+    { id: 'glennfredly', name: 'Glenn Fredly', short: 'GLENN', genre: 'Pop / R&B', country: 'Indonesia', category: 'indo', year: 1975, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/eddf1a3e7b6e57abef80ba3bfc5d4034/500x500-000000-80-0-0.jpg', color1: '#1e3a8a', color2: '#0ea5e9', color3: '#172554', pattern: 'R&B LEGEND', query: 'Glenn Fredly', songs: ['Januari', 'Kasih Putih', 'Sekali Ini Saja', 'Sedih Tak Berujung'] },
+    { id: 'feast', name: '.Feast', short: '.FEAST', genre: 'Indie Rock', country: 'Indonesia', category: 'indo', year: 2012, icon: '🔥', image: 'https://cdn-images.dzcdn.net/images/artist/39f07b5656c1061598b5d68d1c5f5cb1/500x500-000000-80-0-0.jpg', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'INDIE ROCK', query: '.Feast', songs: ['Gugur Bunga', 'Peradaban', 'Tarian Penghancur Raya', 'Sektoral'] },
+    { id: 'efekrumahkaca', name: 'Efek Rumah Kaca', short: 'ERK', genre: 'Indie Rock', country: 'Indonesia', category: 'indo', year: 2001, icon: '🏠', image: 'https://cdn-images.dzcdn.net/images/artist/f69b96ae54fed1cd68eb09065828ee5b/500x500-000000-80-0-0.jpg', color1: '#0f766e', color2: '#14b8a6', color3: '#134e4a', pattern: 'ART ROCK', query: 'Efek Rumah Kaca', songs: ['Cinta Melulu', 'Desember', 'Sebelah Mata', 'Kuning'] },
+    { id: 'hindia', name: 'Hindia', short: 'HINDIA', genre: 'Indie Pop', country: 'Indonesia', category: 'indo', year: 2018, icon: '🌊', image: 'https://cdn-images.dzcdn.net/images/artist/b33a022fb4490dce3b6e12d1c19c0123/500x500-000000-80-0-0.jpg', color1: '#0369a1', color2: '#38bdf8', color3: '#075985', pattern: 'INDIE POP', query: 'Hindia', songs: ['Evaluasi', 'Rumah ke Rumah', 'Secukupnya', 'Membasuh'] },
+    { id: 'juicyluicy', name: 'Juicy Luicy', short: 'JUICY', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 2015, icon: '🍊', image: 'https://cdn-images.dzcdn.net/images/artist/b94e4bb5570b617550f28dbe0012f973/500x500-000000-80-0-0.jpg', color1: '#c2410c', color2: '#fb923c', color3: '#7c2d12', pattern: 'POP MANIS', query: 'Juicy Luicy', songs: ['Lantas', 'Halu', 'Tanpa Tergesa', 'Asing', 'Tampar'] },
+    { id: 'nadinamizah', name: 'Nadin Amizah', short: 'NADIN', genre: 'Folk Pop', country: 'Indonesia', category: 'indo', year: 2000, icon: '🌸', image: 'https://cdn-images.dzcdn.net/images/artist/10a75e65ad84fcfadeca0b74d1a56d0c/500x500-000000-80-0-0.jpg', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'FOLK POP', query: 'Nadin Amizah', songs: ['Bertaut', 'Rumpang', 'Sorai', 'Rayuan Perempuan Gila'] },
+    { id: 'mahalini', name: 'Mahalini', short: 'MAHALINI', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 2000, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/bbb3c9932bf14c2ca059e24a041baf91/500x500-000000-80-0-0.jpg', color1: '#7c3aed', color2: '#c084fc', color3: '#4c1d95', pattern: 'POP BALI', query: 'Mahalini', songs: ['Sial', 'Kisah Sempurna', 'Melawan Restu', 'Mati-Matian'] },
+    { id: 'lyodra', name: 'Lyodra', short: 'LYODRA', genre: 'Pop', country: 'Indonesia', category: 'indo', year: 2003, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/153076781614790ca9a7dd0177cad752/500x500-000000-80-0-0.jpg', color1: '#9d174d', color2: '#f472b6', color3: '#500724', pattern: 'DIVA MUDA', query: 'Lyodra', songs: ['Pesan Terakhir', 'Sang Dewi', 'Tak Dianggap', 'Dibanding Dia'] },
+
+    // ANIME & J-MUSIC BANDS
+    { id: 'yoasobi', name: 'YOASOBI', short: 'YOASOBI', genre: 'J-Pop / Anime', country: 'Jepang', category: 'anime', year: 2019, icon: '⚡', image: 'https://cdn-images.dzcdn.net/images/artist/2cbfaf626a591e162bfcc2b4b0214217/500x500-000000-80-0-0.jpg', color1: '#06b6d4', color2: '#ec4899', color3: '#3b82f6', pattern: 'OSHINOKO', query: 'YOASOBI', songs: ['Idol', 'Yoru ni Kakeru', 'Monster', 'Gunjou', 'Kaibutsu', 'Tracing A Dream'] },
+    { id: 'radwimps', name: 'RADWIMPS', short: 'RAD', genre: 'J-Rock / Anime', country: 'Jepang', category: 'anime', year: 2001, icon: '☄️', image: 'https://cdn-images.dzcdn.net/images/artist/50a3e7af77e5ce620f7c7cab3c7cebb5/500x500-000000-80-0-0.jpg', color1: '#3b82f6', color2: '#8b5cf6', color3: '#1e3a8a', pattern: 'YOURNAME', query: 'RADWIMPS', songs: ['Zenzenzense', 'Sparkle', 'Nandemonaiya', 'Suzume', 'Grand Escape', 'Is There Still Anything That Love Can Do'] },
+    { id: 'lisa', name: 'LiSA', short: 'LiSA', genre: 'J-Rock / Anime', country: 'Jepang', category: 'anime', year: 2010, icon: '🗡️', image: 'https://cdn-images.dzcdn.net/images/artist/d3b778b122f0cd77d58b3806e2bc3ac7/500x500-000000-80-0-0.jpg', color1: '#e11d48', color2: '#fb7185', color3: '#881337', pattern: 'DEMONSLAYER', query: 'LiSA', songs: ['Gurenge', 'Homura', 'Crossing Field', 'Catch the Moment', 'Unlasting', 'Shirushi'] },
+    { id: 'ado', name: 'Ado', short: 'ADO', genre: 'J-Pop / Anime', country: 'Jepang', category: 'anime', year: 2020, icon: '🌹', image: 'https://cdn-images.dzcdn.net/images/artist/858e14d0f8ee062253851aaf3b31daef/500x500-000000-80-0-0.jpg', color1: '#1d4ed8', color2: '#38bdf8', color3: '#0f172a', pattern: 'ONEPIECE', query: 'Ado', songs: ['New Genesis', 'Usseewa', 'Show', 'Odo', 'Backlight', 'Kura Kura'] },
+    { id: 'kenshiyonezu', name: 'Kenshi Yonezu', short: 'YONEZU', genre: 'J-Pop / Anime', country: 'Jepang', category: 'anime', year: 2009, icon: '⛓️', image: 'https://cdn-images.dzcdn.net/images/artist/29288251d9b8a8bd9c8497fb7b4fbcec/500x500-000000-80-0-0.jpg', color1: '#ea580c', color2: '#f59e0b', color3: '#7c2d12', pattern: 'CHAINSAW', query: 'Kenshi Yonezu', songs: ['Kick Back', 'Lemon', 'Peace Sign', 'Chikyuugi', 'Loser', 'Shinigami'] },
+    { id: 'eve', name: 'Eve', short: 'EVE', genre: 'J-Rock / Anime', country: 'Jepang', category: 'anime', year: 2009, icon: '🔮', image: 'https://cdn-images.dzcdn.net/images/artist/becd8ff08ad3391ae3181135a02a0967/500x500-000000-80-0-0.jpg', color1: '#8b5cf6', color2: '#c084fc', color3: '#4c1d95', pattern: 'JUJUTSU', query: 'Eve', songs: ['Kaikai Kitan', 'Dramaturgy', 'As You Like It', 'Fight Song', 'Anoko Secret'] },
+    { id: 'aimer', name: 'Aimer', short: 'AIMER', genre: 'J-Pop / Anime', country: 'Jepang', category: 'anime', year: 2011, icon: '🌙', image: 'https://cdn-images.dzcdn.net/images/artist/3df2b2caf6f46f431925d466400025e9/500x500-000000-80-0-0.jpg', color1: '#6366f1', color2: '#a855f7', color3: '#312e81', pattern: 'NIGHTVOICE', query: 'Aimer', songs: ['Zankyosanka', 'Brave Shine', 'Kataomoi', 'Ame ga Furu kara', 'I beg you', 'StarRingChild'] },
+    { id: 'flow', name: 'FLOW', short: 'FLOW', genre: 'J-Rock / Anime', country: 'Jepang', category: 'anime', year: 1998, icon: '🔥', image: 'https://cdn-images.dzcdn.net/images/artist/956436dd8497171627853345968f2b40/500x500-000000-80-0-0.jpg', color1: '#dc2626', color2: '#f97316', color3: '#991b1b', pattern: 'NARUTO', query: 'FLOW', songs: ['Sign', 'GO!!!', 'Colors', 'Re:member', 'Days', 'Howling'] },
+    { id: 'asiankungfugeneration', name: 'Asian Kung-Fu Generation', short: 'AKFG', genre: 'J-Rock / Anime', country: 'Jepang', category: 'anime', year: 1996, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/a3470c73fa847c7872018577390a2b54/500x500-000000-80-0-0.jpg', color1: '#0284c7', color2: '#38bdf8', color3: '#0c4a6e', pattern: 'HARUKAKANATA', query: 'Asian Kung-Fu Generation', songs: ['Haruka Kanata', 'Re:Re:', 'After Dark', 'Sora Ninare', 'Solanin', 'Rewrite'] },
+    { id: 'officialhigedandism', name: 'Official HIGE DANDism', short: 'HIGEDAN', genre: 'J-Pop / Anime', country: 'Jepang', category: 'anime', year: 2012, icon: '🎩', image: 'https://cdn-images.dzcdn.net/images/artist/36eea2ae92ad5939cc0cedbf448ad6c9/500x500-000000-80-0-0.jpg', color1: '#eab308', color2: '#f97316', color3: '#713f12', pattern: 'SPYFAMILY', query: 'Official HIGE DANDism', songs: ['Pretender', 'Mixed Nuts', 'Cry Baby', 'I Love...', 'Subtitle', '115 Million Kilometer Film'] },
+    { id: 'kessokuband', name: 'Kessoku Band', short: 'KESSOKU', genre: 'J-Rock / Bocchi', country: 'Jepang', category: 'anime', year: 2022, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/d3adbd700a19dfee2fa9a8fd9ede7dce/500x500-000000-80-0-0.jpg', color1: '#ec4899', color2: '#f43f5e', color3: '#881337', pattern: 'BOCCHI', query: 'Kessoku Band', songs: ['Seishun Complex', 'Ano Band', 'Guitar, Loneliness and Blue Planet', 'Wasurete Yaranai', 'Karakara', 'Distortion!!'] },
+
+    // WORLD FAMOUS BANDS & ARTISTS
+    { id: 'coldplay', name: 'Coldplay', short: 'COLDPLAY', genre: 'Alt Rock', country: 'UK', category: 'world', year: 1996, icon: '🌟', image: 'https://cdn-images.dzcdn.net/images/artist/3087954bca22f306324912e5ac8375c3/500x500-000000-80-0-0.jpg', color1: '#1e40af', color2: '#fbbf24', color3: '#172554', pattern: 'LONDON', query: 'Coldplay', songs: ['Yellow', 'Fix You', 'Viva la Vida', 'A Sky Full of Stars', 'The Scientist', 'Paradise'] },
+    { id: 'linkinpark', name: 'Linkin Park', short: 'LP', genre: 'Nu Metal', country: 'USA', category: 'world', year: 1996, icon: '🔥', image: 'https://cdn-images.dzcdn.net/images/artist/4886905210739af3438990897bad3a98/500x500-000000-80-0-0.jpg', color1: '#7f1d1d', color2: '#dc2626', color3: '#450a0a', pattern: 'NU METAL', query: 'Linkin Park', songs: ['Numb', 'In the End', 'Crawling', 'Faint', 'Somewhere I Belong', 'What I\'ve Done'] },
+    { id: 'brunomars', name: 'Bruno Mars', short: 'BRUNO', genre: 'Pop R&B', country: 'USA', category: 'world', year: 1985, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/90f0b5b11df4f87ee878f38569b5995b/500x500-000000-80-0-0.jpg', color1: '#b91c1c', color2: '#f59e0b', color3: '#7c2d12', pattern: 'POP STAR', query: 'Bruno Mars', songs: ['Just the Way You Are', 'Grenade', 'Locked Out of Heaven', 'That\'s What I Like', 'Uptown Funk'] },
+    { id: 'edsheeran', name: 'Ed Sheeran', short: 'ED', genre: 'Pop Folk', country: 'UK', category: 'world', year: 1991, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/d6bb84390641d8ae9118228d9544e53d/500x500-000000-80-0-0.jpg', color1: '#ea580c', color2: '#fbbf24', color3: '#7c2d12', pattern: 'FOLK POP', query: 'Ed Sheeran', songs: ['Shape of You', 'Perfect', 'Photograph', 'Thinking Out Loud', 'Castle on the Hill'] },
+    { id: 'taylorswift', name: 'Taylor Swift', short: 'TAYLOR', genre: 'Pop', country: 'USA', category: 'world', year: 1989, icon: '✨', image: 'https://cdn-images.dzcdn.net/images/artist/cc2495870fe1a792ad0cdb05501ad5ec/500x500-000000-80-0-0.jpg', color1: '#9333ea', color2: '#f472b6', color3: '#4c1d95', pattern: 'POP QUEEN', query: 'Taylor Swift', songs: ['Love Story', 'Shake It Off', 'Blank Space', 'Anti-Hero', 'Cruel Summer', 'Bad Blood'] },
+    { id: 'adele', name: 'Adele', short: 'ADELE', genre: 'Soul Pop', country: 'UK', category: 'world', year: 1988, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/36375832e640b98193b6df6519f7e13f/500x500-000000-80-0-0.jpg', color1: '#7c2d12', color2: '#f59e0b', color3: '#450a0a', pattern: 'SOUL VOICE', query: 'Adele', songs: ['Rolling in the Deep', 'Hello', 'Someone Like You', 'Set Fire to the Rain', 'Easy On Me'] },
+    { id: 'queen', name: 'Queen', short: 'QUEEN', genre: 'Classic Rock', country: 'UK', category: 'world', year: 1970, icon: '👑', image: 'https://cdn-images.dzcdn.net/images/artist/a131ced363dd67249e6a9167164188cb/500x500-000000-80-0-0.jpg', color1: '#7c3aed', color2: '#fbbf24', color3: '#4c1d95', pattern: 'LEGEND', query: 'Queen', songs: ['Bohemian Rhapsody', 'We Will Rock You', 'Don\'t Stop Me Now', 'Another One Bites the Dust', 'We Are The Champions'] },
+    { id: 'maroon5', name: 'Maroon 5', short: 'M5', genre: 'Pop Rock', country: 'USA', category: 'world', year: 1994, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/bbb526b9666c7e31dee295bcabbbdd8e/500x500-000000-80-0-0.jpg', color1: '#be123c', color2: '#f97316', color3: '#831843', pattern: 'POP ROCK', query: 'Maroon 5', songs: ['Sugar', 'Memories', 'Payphone', 'Girls Like You', 'She Will Be Loved', 'Moves Like Jagger'] },
+    { id: 'imaginedragons', name: 'Imagine Dragons', short: 'ID', genre: 'Alt Rock', country: 'USA', category: 'world', year: 2008, icon: '🐉', image: 'https://cdn-images.dzcdn.net/images/artist/1ba025c23cae3dee14b51152990285fc/500x500-000000-80-0-0.jpg', color1: '#991b1b', color2: '#dc2626', color3: '#450a0a', pattern: 'ALT ROCK', query: 'Imagine Dragons', songs: ['Believer', 'Thunder', 'Radioactive', 'Demons', 'Bones', 'Enemy'] },
+    { id: 'theweeknd', name: 'The Weeknd', short: 'WEEKND', genre: 'R&B Pop', country: 'Canada', category: 'world', year: 1990, icon: '🌙', image: 'https://cdn-images.dzcdn.net/images/artist/581693b4724a7fcfa754455101e13a44/500x500-000000-80-0-0.jpg', color1: '#831843', color2: '#db2777', color3: '#500724', pattern: 'R&B POP', query: 'The Weeknd', songs: ['Blinding Lights', 'Starboy', 'Save Your Tears', 'The Hills', 'Can\'t Feel My Face'] },
+    { id: 'billieeilish', name: 'Billie Eilish', short: 'BILLIE', genre: 'Alt Pop', country: 'USA', category: 'world', year: 2001, icon: '💚', image: 'https://cdn-images.dzcdn.net/images/artist/8eab1a9a644889aabaca1e193e05f984/500x500-000000-80-0-0.jpg', color1: '#166534', color2: '#84cc16', color3: '#14532d', pattern: 'ALT POP', query: 'Billie Eilish', songs: ['Bad Guy', 'Lovely', 'Ocean Eyes', 'Happier Than Ever', 'Birds of a Feather'] },
+    { id: 'arianagrande', name: 'Ariana Grande', short: 'ARIANA', genre: 'Pop', country: 'USA', category: 'world', year: 1993, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/721d8fab84b315502de422b8d0901509/500x500-000000-80-0-0.jpg', color1: '#7e22ce', color2: '#c084fc', color3: '#581c87', pattern: 'POP STAR', query: 'Ariana Grande', songs: ['7 Rings', 'Thank U Next', 'Side to Side', 'Positions', 'Into You'] },
+    { id: 'justinbieber', name: 'Justin Bieber', short: 'JB', genre: 'Pop', country: 'Canada', category: 'world', year: 1994, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/fe097f693cebf1f882e3da79e99e3bf9/500x500-000000-80-0-0.jpg', color1: '#0369a1', color2: '#38bdf8', color3: '#0c4a6e', pattern: 'POP STAR', query: 'Justin Bieber', songs: ['Baby', 'Sorry', 'Love Yourself', 'Stay', 'Peaches', 'Ghost'] },
+    { id: 'dualipa', name: 'Dua Lipa', short: 'DUA', genre: 'Pop Disco', country: 'UK', category: 'world', year: 1995, icon: '💃', image: 'https://cdn-images.dzcdn.net/images/artist/877872aaf75694f11d53c318700ab2b5/500x500-000000-80-0-0.jpg', color1: '#be185d', color2: '#f472b6', color3: '#831843', pattern: 'DISCO POP', query: 'Dua Lipa', songs: ['New Rules', 'Levitating', 'Don\'t Start Now', 'Break My Heart', 'Houdini'] },
+    { id: 'eminem', name: 'Eminem', short: 'EMINEM', genre: 'Hip Hop', country: 'USA', category: 'world', year: 1972, icon: '🎤', image: 'https://cdn-images.dzcdn.net/images/artist/7fa738468c9a73ff98c1e1b78d622b81/500x500-000000-80-0-0.jpg', color1: '#1e293b', color2: '#334155', color3: '#0f172a', pattern: 'RAP GOD', query: 'Eminem', songs: ['Lose Yourself', 'Without Me', 'The Real Slim Shady', 'Mockingbird', 'Love The Way You Lie'] },
+    { id: 'michaeljackson', name: 'Michael Jackson', short: 'MJ', genre: 'Pop Soul', country: 'USA', category: 'world', year: 1958, icon: '👑', image: 'https://cdn-images.dzcdn.net/images/artist/ff1c8cf777db1efc2043b90d79dcbfc3/500x500-000000-80-0-0.jpg', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'KING', query: 'Michael Jackson', songs: ['Billie Jean', 'Thriller', 'Beat It', 'Smooth Criminal', 'Heal The World'] },
+    { id: 'thebeatles', name: 'The Beatles', short: 'BEATLES', genre: 'Classic Rock', country: 'UK', category: 'world', year: 1960, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/16925ed8f96eb621ecd56c2c8ba3da6e/500x500-000000-80-0-0.jpg', color1: '#1e40af', color2: '#dc2626', color3: '#172554', pattern: 'LIVERPOOL', query: 'The Beatles', songs: ['Hey Jude', 'Let It Be', 'Yesterday', 'Come Together', 'Here Comes The Sun'] },
+    { id: 'nirvana', name: 'Nirvana', short: 'NIRVANA', genre: 'Grunge', country: 'USA', category: 'world', year: 1987, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/ad67af8b0dca71d5e69f1afd8e045c4e/500x500-000000-80-0-0.jpg', color1: '#1e293b', color2: '#7c3aed', color3: '#0f172a', pattern: 'GRUNGE', query: 'Nirvana', songs: ['Smells Like Teen Spirit', 'Come As You Are', 'Lithium', 'Heart-Shaped Box', 'The Man Who Sold The World'] },
+    { id: 'metallica', name: 'Metallica', short: 'METALLICA', genre: 'Metal', country: 'USA', category: 'world', year: 1981, icon: '🎸', image: 'https://cdn-images.dzcdn.net/images/artist/056578a9c2007f69ce198c81875eca41/500x500-000000-80-0-0.jpg', color1: '#1e293b', color2: '#dc2626', color3: '#0f172a', pattern: 'METAL', query: 'Metallica', songs: ['Nothing Else Matters', 'Enter Sandman', 'Master of Puppets', 'The Unforgiven', 'One'] },
+    { id: 'gunsnroses', name: "Guns N' Roses", short: 'GNR', genre: 'Hard Rock', country: 'USA', category: 'world', year: 1985, icon: '🌹', image: 'https://cdn-images.dzcdn.net/images/artist/c62989722e38d7a2ab18afde3c19bc5c/500x500-000000-80-0-0.jpg', color1: '#991b1b', color2: '#f59e0b', color3: '#450a0a', pattern: 'HARD ROCK', query: 'Guns N Roses', songs: ["Sweet Child O' Mine", 'November Rain', 'Welcome to the Jungle', 'Paradise City', 'Don\'t Cry'] },
+    { id: 'acdc', name: 'AC/DC', short: 'ACDC', genre: 'Hard Rock', country: 'Australia', category: 'world', year: 1973, icon: '⚡', image: 'https://cdn-images.dzcdn.net/images/artist/7dbc950be70f997ba0cd2b39de7f2aa7/500x500-000000-80-0-0.jpg', color1: '#7f1d1d', color2: '#fbbf24', color3: '#450a0a', pattern: 'HARD ROCK', query: 'ACDC', songs: ['Back in Black', 'Highway to Hell', 'Thunderstruck', 'T.N.T.', 'Shoot to Thrill'] },
+    { id: 'bts', name: 'BTS', short: 'BTS', genre: 'K-Pop', country: 'Korea', category: 'world', year: 2013, icon: '💜', image: 'https://cdn-images.dzcdn.net/images/artist/dbabf1a5838446a1d9e3f39ad50c2ab0/500x500-000000-80-0-0.jpg', color1: '#7c3aed', color2: '#ec4899', color3: '#4c1d95', pattern: 'K-POP', query: 'BTS', songs: ['Dynamite', 'Butter', 'Boy With Luv', 'Life Goes On', 'Blood Sweat & Tears', 'Fake Love'] },
+    { id: 'blackpink', name: 'BLACKPINK', short: 'BPINK', genre: 'K-Pop', country: 'Korea', category: 'world', year: 2016, icon: '🖤', image: 'https://cdn-images.dzcdn.net/images/artist/89675729453893a91be35bde691050ff/500x500-000000-80-0-0.jpg', color1: '#be185d', color2: '#1e293b', color3: '#831843', pattern: 'K-POP', query: 'BLACKPINK', songs: ['How You Like That', 'Kill This Love', 'DDU-DU DDU-DU', 'Pink Venom', 'Boombayah', 'As If It\'s Your Last'] }
 ];
 
 const BAND_AVATARS = {};
@@ -857,10 +1072,11 @@ const SONG_DATABASE = {
 
 const STATE = {
     currentPlaylist: [], currentIndex: -1, currentSong: null,
-    isPlaying: false, isShuffle: false, isRepeat: false,
-    volume: CONFIG.DEFAULT_VOLUME, currentBand: null, currentLyricsText: '',
+    isPlaying: false, isShuffle: false, repeatMode: 'off', // off, all, one
+    volume: CONFIG.DEFAULT_VOLUME, playbackRate: 1.0, currentBand: null, currentLyricsText: '',
     currentAnimeTheme: 'ryo', mascotState: 'normal',
-    idleTimer: null, bubbleTimer: null, firstBandPlayed: false
+    idleTimer: null, bubbleTimer: null, firstBandPlayed: false,
+    bandPage: 1, bandAllSongs: [], fullPlayerActiveTab: 'player'
 };
 
 const $ = s => document.querySelector(s);
@@ -873,6 +1089,7 @@ function formatTime(s) {
 }
 function showToast(msg, icon) {
     const t = $('#toast');
+    if (!t) return;
     $('#toast-text').textContent = msg;
     t.querySelector('i').className = 'fas ' + (icon || 'fa-info-circle');
     t.classList.add('show');
@@ -886,11 +1103,15 @@ function escapeHTML(s) {
 function debounce(fn, d) {
     let t; return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), d); };
 }
-function getBandAvatar(id) { return BAND_AVATARS[id] || BAND_AVATARS['iwanfals']; }
+function getBandAvatar(id) {
+    const b = BANDS.find(x => x.id === id);
+    if (b && b.image) return b.image;
+    return BAND_AVATARS[id] || BAND_AVATARS['iwanfals'] || '';
+}
 function findBandByName(name) {
     if (!name) return null;
     const l = name.toLowerCase().trim();
-    return BANDS.find(b => b.name.toLowerCase() === l || b.id === l || l.includes(b.name.toLowerCase()));
+    return BANDS.find(b => b.name.toLowerCase() === l || b.id === l || l.includes(b.name.toLowerCase()) || b.name.toLowerCase().includes(l));
 }
 function findSongInfo(title) {
     if (!title) return null;
@@ -903,39 +1124,9 @@ function findSongInfo(title) {
 }
 
 // ============ API ============
-async function fetchWithProxy(url) {
-    // Backend dulu
+async function fetchSongs(query, limit = 100, page = 1) {
     try {
-        const u = new URL(url);
-        const query = u.searchParams.get('query') || u.searchParams.get('q');
-        if (url.includes('/search/songs') && query) {
-            const r = await fetch(`${CONFIG.BACKEND_URL}/search?q=${encodeURIComponent(query)}&limit=30`);
-            if (r.ok) {
-                const data = await r.json();
-                if (data) return data;
-            }
-        }
-    } catch (e) {}
-    // Fallback ke CORS proxy
-    for (const proxy of CONFIG.CORS_PROXIES) {
-        try {
-            const u = proxy.includes('?') ? proxy + encodeURIComponent(url) : proxy + url;
-            const ctrl = new AbortController();
-            const t = setTimeout(() => ctrl.abort(), 12000);
-            const res = await fetch(u, { signal: ctrl.signal });
-            clearTimeout(t);
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success !== false) return data;
-            }
-        } catch (e) { console.warn('Proxy fail:', e.message); }
-    }
-    return null;
-}
-
-async function fetchSongs(query, limit = 25) {
-    try {
-        const res = await fetch(`${CONFIG.BACKEND_URL}/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+        const res = await fetch(`${CONFIG.BACKEND_URL}/search?q=${encodeURIComponent(query)}&limit=${limit}&p=${page}`);
         if (res.ok) {
             const data = await res.json();
             if (data && data.success && data.data?.results) {
@@ -943,45 +1134,24 @@ async function fetchSongs(query, limit = 25) {
                     const artistName = song.artists?.primary?.[0]?.name || song.artist || 'Unknown';
                     const band = findBandByName(artistName);
                     let image = song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url;
-                    if (band) image = getBandAvatar(band.id);
+                    if (!image && band && band.image) image = band.image;
                     return {
                         id: song.id,
                         title: song.name || song.title || 'Unknown',
                         artist: artistName,
-                        image: image,
-                        albumCover: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url,
+                        image: image || (band ? band.image : '') || 'https://via.placeholder.com/300/1a0b2e/e879f9?text=♪',
+                        albumCover: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url || (band ? band.image : ''),
                         hasBandPhoto: !!band,
                         bandId: band ? band.id : null,
                         audio: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[0]?.url || '',
-                        duration: song.duration || 0
+                        duration: song.duration || 0,
+                        album: song.album?.name || 'Single'
                     };
                 }).filter(s => s.audio);
             }
         }
     } catch (e) {
         console.warn('Backend search error:', e);
-    }
-
-    const url = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`;
-    const data = await fetchWithProxy(url);
-    if (data && data.success && data.data?.results) {
-        return data.data.results.map(song => {
-            const artistName = song.artists?.primary?.[0]?.name || song.artist || 'Unknown';
-            const band = findBandByName(artistName);
-            let image = song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url;
-            if (band) image = getBandAvatar(band.id);
-            return {
-                id: song.id,
-                title: song.name || song.title || 'Unknown',
-                artist: artistName,
-                image: image,
-                albumCover: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url,
-                hasBandPhoto: !!band,
-                bandId: band ? band.id : null,
-                audio: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[0]?.url || '',
-                duration: song.duration || 0
-            };
-        }).filter(s => s.audio);
     }
     return [];
 }
@@ -1009,7 +1179,7 @@ async function fetchLyrics(title, artist) {
     return null;
 }
 
-// ============ RENDER ============
+// ============ RENDER BANDS WITH REAL THUMBNAILS ============
 function renderBands(list, containerId) {
     const c = document.getElementById(containerId);
     if (!c) return;
@@ -1021,15 +1191,17 @@ function renderBands(list, containerId) {
     list.forEach(b => {
         const card = document.createElement('div');
         card.className = 'band-card';
+        const imgUrl = b.image || getBandAvatar(b.id);
+        const fallbackSvg = BAND_AVATARS[b.id] || '';
         card.innerHTML = `
             <div class="band-img">
-                <img src="${getBandAvatar(b.id)}" alt="${escapeHTML(b.name)}" loading="lazy">
+                <img src="${imgUrl}" alt="${escapeHTML(b.name)}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackSvg}';">
                 <div class="play-icon"><i class="fas fa-play-circle"></i></div>
             </div>
             <h4>${escapeHTML(b.name)}</h4>
             <p>${escapeHTML(b.country)}</p>
             <span class="band-genre">${escapeHTML(b.genre)}</span>`;
-        // KLIK BAND → LANGSUNG PUTAR LAGU PERTAMA + BUKA DETAIL
+        // KLIK BAND → BUKA SEMUA LAGU & LANGSUNG PUTAR HITS PERTAMA
         card.addEventListener('click', () => openBandDetail(b, true));
         frag.appendChild(card);
     });
@@ -1041,11 +1213,11 @@ function renderSongs(songs, containerId, opts = {}) {
     const c = document.getElementById(containerId);
     if (!c) return;
     if (opts.loading) {
-        c.innerHTML = `<div class="loading-state"><i class="fas fa-spinner"></i> ${opts.loadingText || 'Memuat...'}</div>`;
+        c.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-spin"></i> ${opts.loadingText || 'Memuat...'}</div>`;
         return;
     }
     if (!songs || !songs.length) {
-        c.innerHTML = `<div class="no-results"><i class="fas fa-music"></i><p>${opts.emptyText || 'Tidak ditemukan'}</p><small>Coba kata kunci lain</small></div>`;
+        c.innerHTML = `<div class="no-results"><i class="fas fa-music"></i><p>${opts.emptyText || 'Tidak ditemukan'}</p><small>Coba muat lagi atau ganti kata kunci</small></div>`;
         return;
     }
     const frag = document.createDocumentFragment();
@@ -1056,7 +1228,7 @@ function renderSongs(songs, containerId, opts = {}) {
         card.dataset.songId = s.id;
         card.innerHTML = `
             <div class="img-wrap">
-                <img src="${escapeHTML(s.image)}" alt="${escapeHTML(s.title)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHTML(s.albumCover || 'https://via.placeholder.com/300/1a0b2e/e879f9?text=♪')}'">
+                <img src="${escapeHTML(s.image)}" alt="${escapeHTML(s.title)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHTML(s.albumCover || 'https://via.placeholder.com/300/1a0b2e/e879f9?text=♪')}';">
                 <div class="play-overlay"><i class="fas fa-play"></i></div>
             </div>
             <h4 title="${escapeHTML(s.title)}">${escapeHTML(s.title)}</h4>
@@ -1072,127 +1244,409 @@ function updatePlayingCard() {
     $$('.song-card').forEach(c => c.classList.toggle('playing', STATE.currentSong && c.dataset.songId === STATE.currentSong.id));
 }
 
-// ============ BAND DETAIL ============
+// ============ BAND DETAIL VIEW (SEMUA LAGU TANPA LIMIT) ============
 async function openBandDetail(band, autoPlay = false) {
     STATE.currentBand = band;
+    STATE.bandPage = 1;
+    STATE.bandAllSongs = [];
+
+    // Adaptasikan tema warna glow player dengan warna identitas band ini!
+    if (band.color1 && band.color2) {
+        document.documentElement.style.setProperty('--player-accent-1', band.color1);
+        document.documentElement.style.setProperty('--player-accent-2', band.color2);
+    }
+
     $('#home-view').style.display = 'none';
     $('#search-view').style.display = 'none';
     $('#anime-theme-page').classList.remove('show');
     $('#band-detail-view').classList.add('show');
     
+    const bandImg = band.image || getBandAvatar(band.id);
+    const fallbackSvg = BAND_AVATARS[band.id] || '';
+
     $('#band-header').innerHTML = `
-        <div class="band-photo"><img src="${getBandAvatar(band.id)}" alt="${escapeHTML(band.name)}"></div>
+        <div class="band-photo">
+            <img src="${bandImg}" alt="${escapeHTML(band.name)}" onerror="this.onerror=null;this.src='${fallbackSvg}';">
+        </div>
         <div class="band-info">
             <div class="band-type">${escapeHTML(band.genre)}</div>
             <h1>${escapeHTML(band.name)}</h1>
             <div class="band-meta">
                 <span><i class="fas fa-globe"></i> ${escapeHTML(band.country)}</span>
                 <span><i class="fas fa-calendar"></i> Sejak ${band.year}</span>
-                <span><i class="fas fa-music"></i> ${band.songs.length}+ hits</span>
+                <span id="band-total-count-badge"><i class="fas fa-music"></i> Memuat katalog lagu...</span>
             </div>
             <div class="band-actions">
                 <button class="play-all" onclick="window.Goyzfy.playAllBandSongs()"><i class="fas fa-play"></i> Putar Semua</button>
-                <button class="follow-btn"><i class="fas fa-heart"></i> Ikuti</button>
+                <button class="follow-btn" id="band-shuffle-all-btn"><i class="fas fa-random"></i> Acak Putar</button>
             </div>
         </div>`;
+    
     $('#band-songs-title').textContent = `🎵 Semua Lagu ${band.name}`;
-    renderSongs(null, 'band-songs-grid', { loading: true, loadingText: `Memuat lagu ${band.name}...` });
+    const filterInput = $('#band-song-filter');
+    if (filterInput) filterInput.value = '';
+    $('#clear-band-filter').style.display = 'none';
+    $('#load-more-container').style.display = 'none';
+
+    renderSongs(null, 'band-songs-grid', { loading: true, loadingText: `Memuat seluruh lagu ${band.name}...` });
     
     try {
-        const results = await fetchSongs(band.query, 50);
+        const results = await fetchSongs(band.query, 100, 1);
         if (results.length) {
-            renderSongs(results, 'band-songs-grid');
+            STATE.bandAllSongs = results;
             STATE.currentPlaylist = results;
+            renderSongs(results, 'band-songs-grid');
+            $('#band-songs-title').textContent = `🎵 Semua Lagu ${band.name} (${results.length} Lagu)`;
+            const badge = $('#band-total-count-badge');
+            if (badge) badge.innerHTML = `<i class="fas fa-music"></i> ${results.length}+ Lagu Siap Putar`;
+            
+            // Tampilkan tombol muat lebih banyak lagu jika ada lebih banyak dari provider
+            $('#load-more-container').style.display = 'block';
+            $('#next-page-num').textContent = '2';
+
             // AUTO PLAY lagu pertama
             if (autoPlay && results.length > 0) {
                 playSong(results[0], results);
-                showToast('▶ Memutar: ' + results[0].title, 'fa-play');
             }
         } else {
-            renderSongs([], 'band-songs-grid', { emptyText: `Lagu ${band.name} tidak ditemukan` });
+            renderSongs([], 'band-songs-grid', { emptyText: `Lagu ${band.name} tidak ditemukan di provider.` });
         }
     } catch (e) {
-        renderSongs([], 'band-songs-grid', { emptyText: 'Gagal memuat' });
+        renderSongs([], 'band-songs-grid', { emptyText: 'Gagal memuat lagu' });
     }
 }
+
+async function loadMoreBandSongs() {
+    if (!STATE.currentBand) return;
+    const btn = $('#load-more-songs-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat lagu berikutnya...';
+    btn.disabled = true;
+
+    STATE.bandPage += 1;
+    try {
+        const moreResults = await fetchSongs(STATE.currentBand.query, 100, STATE.bandPage);
+        if (moreResults && moreResults.length) {
+            // Gabungkan lagu tanpa duplikat id
+            const existingIds = new Set(STATE.bandAllSongs.map(s => s.id));
+            const newTracks = moreResults.filter(s => !existingIds.has(s.id));
+            if (newTracks.length) {
+                STATE.bandAllSongs = STATE.bandAllSongs.concat(newTracks);
+                STATE.currentPlaylist = STATE.bandAllSongs;
+                renderSongs(STATE.bandAllSongs, 'band-songs-grid');
+                $('#band-songs-title').textContent = `🎵 Semua Lagu ${STATE.currentBand.name} (${STATE.bandAllSongs.length} Lagu)`;
+                $('#next-page-num').textContent = STATE.bandPage + 1;
+                showToast(`+${newTracks.length} lagu baru ditambahkan!`, 'fa-check');
+            } else {
+                showToast('Semua lagu band ini sudah dimuat!', 'fa-info-circle');
+                $('#load-more-container').style.display = 'none';
+            }
+        } else {
+            showToast('Semua lagu band ini sudah dimuat!', 'fa-info-circle');
+            $('#load-more-container').style.display = 'none';
+        }
+    } catch (e) {
+        showToast('Gagal memuat halaman berikutnya', 'fa-exclamation-triangle');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Live filter di dalam detail lagu band
+$('#band-song-filter')?.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    $('#clear-band-filter').style.display = q ? 'block' : 'none';
+    if (!STATE.bandAllSongs || !STATE.bandAllSongs.length) return;
+    if (!q) {
+        renderSongs(STATE.bandAllSongs, 'band-songs-grid');
+        return;
+    }
+    const filtered = STATE.bandAllSongs.filter(s => s.title.toLowerCase().includes(q) || (s.album && s.album.toLowerCase().includes(q)));
+    renderSongs(filtered, 'band-songs-grid', { emptyText: `Tidak ada lagu cocok dengan "${q}"` });
+});
+$('#clear-band-filter')?.addEventListener('click', () => {
+    const input = $('#band-song-filter');
+    if (input) input.value = '';
+    $('#clear-band-filter').style.display = 'none';
+    if (STATE.bandAllSongs) renderSongs(STATE.bandAllSongs, 'band-songs-grid');
+});
+$('#load-more-songs-btn')?.addEventListener('click', loadMoreBandSongs);
 
 function playAllBandSongs() {
     if (STATE.currentPlaylist.length) {
         playSong(STATE.currentPlaylist[0], STATE.currentPlaylist);
-        showToast('Memutar semua lagu ' + STATE.currentBand.name, 'fa-play');
+        showToast('Memutar semua lagu ' + (STATE.currentBand?.name || ''), 'fa-play');
     } else showToast('Belum ada lagu', 'fa-info-circle');
 }
+document.addEventListener('click', e => {
+    if (e.target.closest('#band-shuffle-all-btn')) {
+        if (STATE.currentPlaylist.length) {
+            STATE.isShuffle = true;
+            $('#shuffle-btn')?.classList.add('active');
+            $('#fp-shuffle-btn')?.classList.add('active');
+            const randomIdx = Math.floor(Math.random() * STATE.currentPlaylist.length);
+            playSong(STATE.currentPlaylist[randomIdx], STATE.currentPlaylist);
+            showToast('🔀 Acak putar semua lagu ' + (STATE.currentBand?.name || ''), 'fa-random');
+        }
+    }
+});
 
-// ============ PLAYER ============
+// ============ AUDIO PLAYER & ADAPTIVE PLAYER CONTROLS ============
 const audio = document.getElementById('audio-player');
+
+function getAdaptiveColors(text) {
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    const h1 = Math.abs(hash) % 360;
+    const h2 = (h1 + 60) % 360;
+    return [`hsl(${h1}, 85%, 55%)`, `hsl(${h2}, 90%, 65%)`];
+}
 
 function playSong(song, playlist) {
     if (!song || !song.audio) { showToast('Lagu tidak bisa diputar', 'fa-exclamation-triangle'); return; }
     STATE.currentPlaylist = playlist || [song];
     STATE.currentIndex = Math.max(0, STATE.currentPlaylist.findIndex(s => s.id === song.id));
     STATE.currentSong = song;
+
+    // Adaptasikan warna player dengan band dari lagu yang sedang diputar
+    const band = STATE.currentBand || findBandByName(song.artist);
+    if (band && band.color1) {
+        document.documentElement.style.setProperty('--player-accent-1', band.color1);
+        document.documentElement.style.setProperty('--player-accent-2', band.color2 || '#22d3ee');
+    } else {
+        const [c1, c2] = getAdaptiveColors(song.artist || song.title);
+        document.documentElement.style.setProperty('--player-accent-1', c1);
+        document.documentElement.style.setProperty('--player-accent-2', c2);
+    }
+
     audio.src = song.audio;
     audio.volume = STATE.volume;
+    audio.playbackRate = STATE.playbackRate;
+
+    // Update Mini Player UI
     $('#player-img').src = song.image;
     $('#player-title').textContent = song.title;
     $('#player-artist').textContent = song.artist;
+    $('#player-bar')?.classList.add('playing');
+
+    // Update Fullscreen Player UI
+    $('#fp-cover-img').src = song.albumCover || song.image;
+    $('#fp-title').textContent = song.title;
+    $('#fp-artist').textContent = song.artist;
+    $('#fp-band-title').textContent = band ? band.name : song.artist;
+
+    // Update Antrean tab
+    renderFullPlayerQueue();
+    // Update Artist tab
+    updateFullPlayerArtistTab(band || { name: song.artist, genre: 'Music', country: 'Global', image: song.image, songs: [song.title] });
+
     audio.play().then(() => {
         STATE.isPlaying = true;
         updatePlayButton();
         updatePlayingCard();
+        $('#vinyl-disc')?.classList.add('spinning');
         showToast('▶ ' + song.title, 'fa-play');
+        // Fetch lirik otomatis
+        preloadLyrics(song.title, song.artist);
     }).catch(() => {
-        showToast('Klik play manual untuk memutar', 'fa-info-circle');
-        STATE.isPlaying = false; updatePlayButton();
+        showToast('Klik tombol putar untuk memulai', 'fa-info-circle');
+        STATE.isPlaying = false;
+        updatePlayButton();
+        $('#vinyl-disc')?.classList.remove('spinning');
     });
 }
 
 function updatePlayButton() {
-    $('#play-btn').innerHTML = STATE.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+    const playIcon = STATE.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+    $('#play-btn').innerHTML = playIcon;
+    $('#fp-play-btn').innerHTML = playIcon;
     $('#now-playing').classList.toggle('playing', STATE.isPlaying);
+    if (STATE.isPlaying) {
+        $('#vinyl-disc')?.classList.add('spinning');
+    } else {
+        $('#vinyl-disc')?.classList.remove('spinning');
+    }
 }
 
-$('#play-btn').addEventListener('click', () => {
+async function preloadLyrics(title, artist) {
+    const pane = $('#fp-lyrics-content');
+    if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Memuat lirik...</p></div>';
+    const lyrics = await fetchLyrics(title, artist);
+    if (lyrics) {
+        STATE.currentLyricsText = lyrics;
+        if (pane) pane.innerHTML = `<div style="font-size:16px;line-height:2.2;">${escapeHTML(lyrics)}</div>`;
+        const modalBody = $('#lyrics-body');
+        if (modalBody) modalBody.innerHTML = `<div style="font-size:15px;line-height:2;">${escapeHTML(lyrics)}</div>`;
+    } else {
+        STATE.currentLyricsText = '';
+        if (pane) pane.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini</p></div>';
+        const modalBody = $('#lyrics-body');
+        if (modalBody) modalBody.innerHTML = '<div class="lyrics-placeholder"><i class="fas fa-microphone-slash"></i><p>Lirik belum tersedia untuk lagu ini</p></div>';
+    }
+}
+
+function renderFullPlayerQueue() {
+    const list = $('#fp-queue-list');
+    const countBadge = $('#fp-queue-count');
+    if (!list) return;
+    if (countBadge) countBadge.textContent = STATE.currentPlaylist.length;
+    list.innerHTML = '';
+    STATE.currentPlaylist.forEach((s, idx) => {
+        const item = document.createElement('div');
+        item.className = 'queue-item' + (s.id === STATE.currentSong?.id ? ' active' : '');
+        item.innerHTML = `
+            <img src="${escapeHTML(s.image)}" alt="${escapeHTML(s.title)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/100';">
+            <div class="queue-item-info">
+                <h4>${escapeHTML(s.title)}</h4>
+                <p>${escapeHTML(s.artist)}</p>
+            </div>
+            ${s.id === STATE.currentSong?.id ? '<i class="fas fa-volume-high" style="color:var(--accent-secondary);font-size:13px;"></i>' : ''}
+        `;
+        item.addEventListener('click', () => playSong(s, STATE.currentPlaylist));
+        list.appendChild(item);
+    });
+}
+
+function updateFullPlayerArtistTab(band) {
+    const photo = $('#fp-artist-photo');
+    if (photo) photo.src = band.image || getBandAvatar(band.id);
+    $('#fp-artist-name').textContent = band.name || 'Artis';
+    $('#fp-artist-genre').textContent = `${band.genre || 'Musik'} • ${band.country || 'Dunia'} ${band.year ? '• Sejak ' + band.year : ''}`;
+    $('#fp-artist-desc').textContent = `${band.name} adalah salah satu band dan musisi terpopuler di Goyzfy Anime Edition. Ribuan pendengar menikmati karya musik mereka setiap hari.`;
+    const hitsBox = $('#fp-artist-hits');
+    if (hitsBox && band.songs) {
+        hitsBox.innerHTML = band.songs.map(songName => `<span class="category-pill" style="padding:4px 10px;font-size:11px;">🎵 ${escapeHTML(songName)}</span>`).join('');
+    }
+}
+
+// Toggle play
+function togglePlay() {
     if (!audio.src) { showToast('Pilih lagu dulu!', 'fa-info-circle'); return; }
     if (STATE.isPlaying) audio.pause(); else audio.play().catch(() => {});
-});
-$('#next-btn').addEventListener('click', () => {
+}
+$('#play-btn').addEventListener('click', togglePlay);
+$('#fp-play-btn').addEventListener('click', togglePlay);
+
+// Next / Prev
+function nextTrack() {
     if (!STATE.currentPlaylist.length) return;
     STATE.currentIndex = STATE.isShuffle ? Math.floor(Math.random() * STATE.currentPlaylist.length) : (STATE.currentIndex + 1) % STATE.currentPlaylist.length;
     playSong(STATE.currentPlaylist[STATE.currentIndex], STATE.currentPlaylist);
-});
-$('#prev-btn').addEventListener('click', () => {
+}
+function prevTrack() {
     if (!STATE.currentPlaylist.length) return;
     if (audio.currentTime > 3) { audio.currentTime = 0; return; }
     STATE.currentIndex = (STATE.currentIndex - 1 + STATE.currentPlaylist.length) % STATE.currentPlaylist.length;
     playSong(STATE.currentPlaylist[STATE.currentIndex], STATE.currentPlaylist);
-});
-$('#shuffle-btn').addEventListener('click', function () {
+}
+$('#next-btn').addEventListener('click', nextTrack);
+$('#fp-next-btn').addEventListener('click', nextTrack);
+$('#prev-btn').addEventListener('click', prevTrack);
+$('#fp-prev-btn').addEventListener('click', prevTrack);
+
+// 10s Rewind & Forward
+function rewind10() {
+    audio.currentTime = Math.max(0, audio.currentTime - 10);
+    showToast('⏪ -10 Detik', 'fa-rotate-left');
+}
+function forward10() {
+    if (audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+    showToast('⏩ +10 Detik', 'fa-rotate-right');
+}
+$('#rewind-btn')?.addEventListener('click', rewind10);
+$('#fp-rewind-btn')?.addEventListener('click', rewind10);
+$('#forward-btn')?.addEventListener('click', forward10);
+$('#fp-forward-btn')?.addEventListener('click', forward10);
+
+// Playback Speed Toggle
+const SPEED_STEPS = [1.0, 1.25, 1.5, 2.0, 0.75];
+function cyclePlaybackSpeed() {
+    const curIdx = SPEED_STEPS.indexOf(STATE.playbackRate);
+    const nextIdx = (curIdx + 1) % SPEED_STEPS.length;
+    STATE.playbackRate = SPEED_STEPS[nextIdx];
+    audio.playbackRate = STATE.playbackRate;
+    const txt = STATE.playbackRate + 'x';
+    if ($('#speed-btn')) $('#speed-btn').textContent = txt;
+    if ($('#fp-speed-btn')) $('#fp-speed-btn').textContent = txt;
+    showToast('Kecepatan: ' + txt, 'fa-gauge-high');
+}
+$('#speed-btn')?.addEventListener('click', cyclePlaybackSpeed);
+$('#fp-speed-btn')?.addEventListener('click', cyclePlaybackSpeed);
+
+// Shuffle & Repeat
+function toggleShuffle() {
     STATE.isShuffle = !STATE.isShuffle;
-    this.classList.toggle('active', STATE.isShuffle);
+    $('#shuffle-btn').classList.toggle('active', STATE.isShuffle);
+    $('#fp-shuffle-btn').classList.toggle('active', STATE.isShuffle);
     showToast(STATE.isShuffle ? '🔀 Acak AKTIF' : 'Acak MATI', 'fa-random');
-});
-$('#repeat-btn').addEventListener('click', function () {
-    STATE.isRepeat = !STATE.isRepeat;
-    this.classList.toggle('active', STATE.isRepeat);
-    showToast(STATE.isRepeat ? '🔁 Ulangi AKTIF' : 'Ulangi MATI', 'fa-redo');
-});
-$('#like-btn').addEventListener('click', function () {
-    this.classList.toggle('liked'); this.classList.toggle('far'); this.classList.toggle('fas');
-    showToast(this.classList.contains('liked') ? '❤️ Favorit' : 'Dihapus', 'fa-heart');
-});
+}
+$('#shuffle-btn').addEventListener('click', toggleShuffle);
+$('#fp-shuffle-btn').addEventListener('click', toggleShuffle);
+
+function cycleRepeat() {
+    if (STATE.repeatMode === 'off') {
+        STATE.repeatMode = 'all';
+        $('#repeat-btn').classList.add('active');
+        $('#fp-repeat-btn').classList.add('active');
+        $('#repeat-btn').innerHTML = '<i class="fas fa-redo"></i>';
+        $('#fp-repeat-btn').innerHTML = '<i class="fas fa-redo"></i>';
+        showToast('🔁 Ulangi Semua AKTIF', 'fa-redo');
+    } else if (STATE.repeatMode === 'all') {
+        STATE.repeatMode = 'one';
+        $('#repeat-btn').classList.add('active');
+        $('#fp-repeat-btn').classList.add('active');
+        $('#repeat-btn').innerHTML = '<i class="fas fa-repeat-1"></i>';
+        $('#fp-repeat-btn').innerHTML = '<i class="fas fa-repeat-1"></i>';
+        showToast('🔂 Ulangi 1 Lagu AKTIF', 'fa-redo');
+    } else {
+        STATE.repeatMode = 'off';
+        $('#repeat-btn').classList.remove('active');
+        $('#fp-repeat-btn').classList.remove('active');
+        $('#repeat-btn').innerHTML = '<i class="fas fa-redo"></i>';
+        $('#fp-repeat-btn').innerHTML = '<i class="fas fa-redo"></i>';
+        showToast('Ulangi MATI', 'fa-redo');
+    }
+}
+$('#repeat-btn').addEventListener('click', cycleRepeat);
+$('#fp-repeat-btn').addEventListener('click', cycleRepeat);
+
+// Likes
+function toggleLike() {
+    const isLiked = $('#like-btn').classList.toggle('liked');
+    $('#like-btn').classList.toggle('far', !isLiked);
+    $('#like-btn').classList.toggle('fas', isLiked);
+    $('#fp-like-btn').classList.toggle('liked', isLiked);
+    $('#fp-like-btn').innerHTML = isLiked ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+    showToast(isLiked ? '❤️ Disukai!' : 'Dihapus dari favorit', 'fa-heart');
+}
+$('#like-btn').addEventListener('click', toggleLike);
+$('#fp-like-btn').addEventListener('click', toggleLike);
+
+// Audio events
 audio.addEventListener('timeupdate', () => {
     if (audio.duration) {
         const p = (audio.currentTime / audio.duration) * 100;
         $('#progress-fill').style.width = p + '%';
-        $('#current-time').textContent = formatTime(audio.currentTime);
-        $('#total-time').textContent = formatTime(audio.duration);
+        $('#fp-progress-fill').style.width = p + '%';
+        const curFormatted = formatTime(audio.currentTime);
+        const durFormatted = formatTime(audio.duration);
+        $('#current-time').textContent = curFormatted;
+        $('#fp-current-time').textContent = curFormatted;
+        $('#total-time').textContent = durFormatted;
+        $('#fp-total-time').textContent = durFormatted;
     }
 });
 audio.addEventListener('ended', () => {
-    if (STATE.isRepeat) { audio.currentTime = 0; audio.play(); }
-    else if (STATE.currentPlaylist.length > 1) $('#next-btn').click();
-    else { STATE.isPlaying = false; updatePlayButton(); }
+    if (STATE.repeatMode === 'one') {
+        audio.currentTime = 0;
+        audio.play();
+    } else if (STATE.currentPlaylist.length > 1) {
+        nextTrack();
+    } else {
+        STATE.isPlaying = false;
+        updatePlayButton();
+    }
 });
 audio.addEventListener('play', () => { STATE.isPlaying = true; updatePlayButton(); });
 audio.addEventListener('pause', () => { STATE.isPlaying = false; updatePlayButton(); });
@@ -1210,24 +1664,69 @@ audio.addEventListener('error', () => {
         showToast('Gagal memuat audio', 'fa-exclamation-triangle');
     }
 });
-$('#progress-bar').addEventListener('click', e => {
-    const r = e.currentTarget.getBoundingClientRect();
+
+// Seek bar clicks
+function handleSeek(e, barEl) {
+    const r = barEl.getBoundingClientRect();
     if (audio.duration) audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
-});
-$('#volume-slider').addEventListener('input', e => {
-    STATE.volume = e.target.value / 100;
-    audio.volume = STATE.volume;
-    updateVolumeIcon();
-});
-function updateVolumeIcon() {
-    const i = $('#volume-icon');
-    i.className = STATE.volume === 0 ? 'fas fa-volume-mute' : STATE.volume < 0.5 ? 'fas fa-volume-down' : 'fas fa-volume-up';
 }
-$('#volume-icon').addEventListener('click', () => {
-    STATE.volume = STATE.volume > 0 ? 0 : CONFIG.DEFAULT_VOLUME;
+$('#progress-bar').addEventListener('click', e => handleSeek(e, $('#progress-bar')));
+$('#fp-progress-bar')?.addEventListener('click', e => handleSeek(e, $('#fp-progress-bar')));
+
+// Volumes
+function updateVolume(val) {
+    STATE.volume = val / 100;
     audio.volume = STATE.volume;
-    $('#volume-slider').value = STATE.volume * 100;
+    $('#volume-slider').value = val;
+    if ($('#fp-vol-slider')) $('#fp-vol-slider').value = val;
     updateVolumeIcon();
+}
+$('#volume-slider').addEventListener('input', e => updateVolume(e.target.value));
+$('#fp-vol-slider')?.addEventListener('input', e => updateVolume(e.target.value));
+function updateVolumeIcon() {
+    const cls = STATE.volume === 0 ? 'fas fa-volume-mute' : STATE.volume < 0.5 ? 'fas fa-volume-down' : 'fas fa-volume-up';
+    $('#volume-icon').className = cls;
+    if ($('#fp-vol-icon')) $('#fp-vol-icon').className = cls;
+}
+$('#volume-icon').addEventListener('click', () => updateVolume(STATE.volume > 0 ? 0 : CONFIG.DEFAULT_VOLUME * 100));
+$('#fp-vol-icon')?.addEventListener('click', () => updateVolume(STATE.volume > 0 ? 0 : CONFIG.DEFAULT_VOLUME * 100));
+
+// FULLSCREEN PLAYER MODAL CONTROLS
+function openFullscreenPlayer() {
+    if (!STATE.currentSong) {
+        showToast('Pilih lagu terlebih dahulu!', 'fa-info-circle');
+        return;
+    }
+    $('#fullscreen-player-modal').classList.add('show');
+}
+function closeFullscreenPlayer() {
+    $('#fullscreen-player-modal').classList.remove('show');
+}
+$('#now-playing').addEventListener('click', e => {
+    if (e.target.closest('#like-btn')) return;
+    openFullscreenPlayer();
+});
+$('#expand-player-btn')?.addEventListener('click', openFullscreenPlayer);
+$('#fp-close-btn')?.addEventListener('click', closeFullscreenPlayer);
+$('#queue-btn')?.addEventListener('click', () => {
+    openFullscreenPlayer();
+    switchFullPlayerTab('queue');
+});
+$('#fp-lyrics-quick-btn')?.addEventListener('click', () => switchFullPlayerTab('lyrics'));
+
+// Switch tabs inside Full Player
+function switchFullPlayerTab(tabName) {
+    STATE.fullPlayerActiveTab = tabName;
+    $$('.fp-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.fptab === tabName));
+    $$('.fp-tab-pane').forEach(pane => pane.classList.toggle('active', pane.id === 'fp-tab-' + tabName));
+    if (tabName === 'queue') renderFullPlayerQueue();
+}
+$$('.fp-tab-btn').forEach(btn => btn.addEventListener('click', () => switchFullPlayerTab(btn.dataset.fptab)));
+
+$('#fp-copy-link-btn')?.addEventListener('click', () => {
+    if (!STATE.currentSong) return;
+    const shareText = `Mendengarkan "${STATE.currentSong.title}" - ${STATE.currentSong.artist} di Goyzfy Anime Edition 🎵`;
+    navigator.clipboard.writeText(shareText).then(() => showToast('Judul lagu disalin! 📋', 'fa-check'));
 });
 
 // ============ SEARCH ============
@@ -1241,7 +1740,7 @@ async function performSearch(q) {
     $('#search-view').style.display = 'block';
     $('#search-title').textContent = `🔍 Hasil: "${q}"`;
     renderSongs(null, 'search-grid', { loading: true, loadingText: `Mencari "${q}"...` });
-    const results = await fetchSongs(q, 30);
+    const results = await fetchSongs(q, 100);
     renderSongs(results, 'search-grid', { emptyText: `Tidak ditemukan "${q}"` });
     if (results.length) showToast(`Ditemukan ${results.length} lagu`, 'fa-check-circle');
 }
@@ -1434,7 +1933,8 @@ $$('.category-pill').forEach(p => p.addEventListener('click', function () {
     this.classList.add('active');
     const cat = this.dataset.cat;
     let f = BANDS;
-    if (cat === 'indo') f = BANDS.filter(b => b.country === 'Indonesia');
+    if (cat === 'anime') f = BANDS.filter(b => b.category === 'anime' || /anime|j-pop|j-rock|bocchi/i.test(b.genre));
+    else if (cat === 'indo') f = BANDS.filter(b => b.country === 'Indonesia');
     else if (cat === 'world') f = BANDS.filter(b => b.country !== 'Indonesia');
     else if (cat === 'rock') f = BANDS.filter(b => /rock|metal|grunge/i.test(b.genre));
     else if (cat === 'pop') f = BANDS.filter(b => /pop/i.test(b.genre));
@@ -1452,7 +1952,8 @@ $$('.nav-item').forEach(item => item.addEventListener('click', function () {
     else if (nav === 'anime') { openAnimeTheme(); }
     else if (pl) {
         showHome();
-        if (pl === 'indo') renderBands(BANDS.filter(b => b.country === 'Indonesia'), 'band-grid');
+        if (pl === 'anime') renderBands(BANDS.filter(b => b.category === 'anime' || /anime|j-pop|j-rock|bocchi/i.test(b.genre)), 'band-grid');
+        else if (pl === 'indo') renderBands(BANDS.filter(b => b.country === 'Indonesia'), 'band-grid');
         else if (pl === 'world') renderBands(BANDS.filter(b => b.country !== 'Indonesia'), 'band-grid');
         else if (pl === 'rock') renderBands(BANDS.filter(b => /rock|metal|grunge/i.test(b.genre)), 'band-grid');
         else if (pl === 'pop') renderBands(BANDS.filter(b => /pop/i.test(b.genre)), 'band-grid');

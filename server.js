@@ -354,47 +354,73 @@ app.get('/api/stream', async (req, res) => {
     }
 });
 
-// Endpoint pencarian lagu dengan fallback provider dan penyiapan audio valid
+// Endpoint pencarian lagu dengan agregasi multi-provider tanpa limit
 app.get('/api/search', async (req, res) => {
     const query = (req.query.q || req.query.query || '').trim();
     if (!query) {
         return res.status(400).json({ success: false, error: 'Query parameter "q" or "query" is required' });
     }
 
-    let finalResults = null;
-    let lastErrorReason = null;
+    const requestedLimit = Math.min(200, Math.max(10, parseInt(req.query.limit, 10) || 100));
+    const requestedPage = Math.max(1, parseInt(req.query.p || req.query.page, 10) || 1);
 
-    for (let i = 0; i < API_PROVIDERS.length; i++) {
-        const provider = API_PROVIDERS[i];
-        console.log(`[Search] Provider ${i + 1}/${API_PROVIDERS.length} | Mencoba: ${provider.url} | Query: "${query}"`);
+    console.log(`[Search] Agregasi paralel untuk: "${query}" (limit: ${requestedLimit}, page: ${requestedPage})`);
 
-        try {
-            const params = { [provider.param]: query, ...(provider.extraParams || {}) };
-            const response = await axios.get(provider.url, {
-                params,
-                timeout: 8000,
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    // Jalankan pencarian ke JioSaavn, Deezer, dan iTunes secara paralel agar semua katalog lagu band terkumpul
+    const providers = [
+        {
+            name: 'JioSaavn',
+            call: axios.get('https://www.jiosaavn.com/api.php', {
+                params: {
+                    __call: 'search.getResults',
+                    _format: 'json',
+                    _marker: '0',
+                    p: String(requestedPage),
+                    n: String(Math.min(100, requestedLimit)),
+                    q: query
                 },
-                validateStatus: (status) => status >= 200 && status < 300
-            });
+                timeout: 8000,
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            })
+        },
+        {
+            name: 'Deezer',
+            call: axios.get('https://api.deezer.com/search', {
+                params: {
+                    q: query,
+                    limit: String(requestedLimit),
+                    index: String((requestedPage - 1) * requestedLimit)
+                },
+                timeout: 8000,
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            })
+        },
+        {
+            name: 'iTunes',
+            call: axios.get('https://itunes.apple.com/search', {
+                params: {
+                    term: query,
+                    media: 'music',
+                    country: 'ID',
+                    limit: String(Math.min(200, requestedLimit * 2))
+                },
+                timeout: 8000,
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            })
+        }
+    ];
 
-            console.log(`[Search] Status HTTP provider ${provider.url}: ${response.status}`);
+    const resultsByProvider = await Promise.allSettled(providers.map(p => p.call));
 
-            if (!response.data || typeof response.data !== 'object') {
-                throw new Error('Respons bukan JSON valid');
-            }
+    let allRawItems = [];
 
-            const rawList = extractResults(response.data);
-            if (!rawList) {
-                throw new Error('Struktur respons tidak sesuai (hasil tidak ditemukan)');
-            }
-
-            console.log(`[Search] Berhasil dari provider: ${provider.url} (${rawList.length} hasil mentah)`);
-
-            // Decrypt langsung jika provider sudah menyediakan encrypted_media_url
-            rawList.forEach(item => {
+    // 1. Ekstrak JioSaavn
+    if (resultsByProvider[0].status === 'fulfilled') {
+        const jioData = resultsByProvider[0].value.data;
+        const jioList = extractResults(jioData);
+        if (jioList && jioList.length > 0) {
+            // Decrypt JioSaavn urls jika ada
+            jioList.forEach(item => {
                 if (item.encrypted_media_url && !item.audio_direct) {
                     const decrypted = desDecryptUrl(item.encrypted_media_url);
                     if (decrypted && decrypted.startsWith('http')) {
@@ -403,76 +429,116 @@ app.get('/api/search', async (req, res) => {
                 }
             });
 
-            // Dapatkan audio streaming valid via JioSaavn getDetails batch untuk yang belum punya audio
-            const missingIds = rawList.filter(item => !item.audio_direct).map(item => item.id).filter(Boolean);
+            // Batch detail untuk JioSaavn yang belum punya audio
+            const missingIds = jioList.filter(item => !item.audio_direct).map(item => item.id).filter(Boolean);
             if (missingIds.length > 0) {
+                const batchPids = missingIds.slice(0, 50).join(',');
                 try {
-                    const batchPids = missingIds.slice(0, 20).join(',');
-                    const detailUrl = `https://www.jiosaavn.com/api.php?__call=song.getDetails&cc=in&_marker=0%3F_marker%3D0&_format=json&pids=${encodeURIComponent(batchPids)}`;
-                    const detailRes = await axios.get(detailUrl, {
+                    const detailRes = await axios.get(`https://www.jiosaavn.com/api.php?__call=song.getDetails&cc=in&_marker=0&_format=json&pids=${encodeURIComponent(batchPids)}`, {
                         headers: { 'User-Agent': 'Mozilla/5.0' },
-                        timeout: 3500
+                        timeout: 4000
                     });
-
                     if (detailRes.data && typeof detailRes.data === 'object') {
-                        rawList.forEach(item => {
+                        jioList.forEach(item => {
                             const detail = detailRes.data[item.id];
                             if (detail) {
-                                if (detail.encrypted_media_url) {
+                                if (detail.encrypted_media_url && !item.audio_direct) {
                                     const decrypted = desDecryptUrl(detail.encrypted_media_url);
                                     if (decrypted && decrypted.startsWith('http')) {
                                         item.audio_direct = decrypted;
                                     }
                                 }
-                                if (detail.vlink && !item.audio_direct) {
-                                    item.vlink = detail.vlink;
-                                }
-                                if (detail.duration && !item.duration) {
-                                    item.duration = detail.duration;
-                                }
+                                if (detail.vlink && !item.audio_direct) item.vlink = detail.vlink;
+                                if (detail.duration && !item.duration) item.duration = detail.duration;
                             }
                         });
                     }
-                } catch (batchErr) {
-                    console.warn('[Search] Gagal batch details audio:', batchErr.message);
-                }
+                } catch (e) {}
             }
 
-            const candidateResults = rawList.map(normalizeSong).filter(s => s && s.downloadUrl && s.downloadUrl.length > 0);
-            if (candidateResults.length > 0) {
-                finalResults = candidateResults;
-                break;
-            } else {
-                console.log(`[Search] Provider ${provider.name || provider.url} tidak menghasilkan lagu dengan audio valid, mencoba provider berikutnya...`);
-            }
-        } catch (err) {
-            let errorReason = err.message;
-            if (err.code === 'ENOTFOUND') {
-                errorReason = 'DNS ENOTFOUND (Domain tidak ditemukan)';
-            } else if (err.code === 'ECONNABORTED' || (err.message && err.message.includes('timeout'))) {
-                errorReason = 'Request Timeout (Melebihi batas waktu)';
-            } else if (err.response) {
-                errorReason = `HTTP Error ${err.response.status} (${err.response.statusText || 'Error'})`;
-            }
-            console.warn(`[Search] Provider ${provider.url} gagal: ${errorReason}`);
-            lastErrorReason = errorReason;
+            allRawItems = allRawItems.concat(jioList);
         }
     }
 
-    if (finalResults !== null) {
+    // 2. Ekstrak Deezer
+    if (resultsByProvider[1].status === 'fulfilled') {
+        const deezerData = resultsByProvider[1].value.data;
+        const deezerList = extractResults(deezerData);
+        if (deezerList && deezerList.length > 0) {
+            allRawItems = allRawItems.concat(deezerList);
+        }
+    }
+
+    // 3. Ekstrak iTunes
+    if (resultsByProvider[2].status === 'fulfilled') {
+        const itunesData = resultsByProvider[2].value.data;
+        const itunesList = extractResults(itunesData);
+        if (itunesList && itunesList.length > 0) {
+            allRawItems = allRawItems.concat(itunesList);
+        }
+    }
+
+    // Normalisasi dan deduplikasi lagu berdasarkan kombinasi judul & artis agar daftar lengkap tanpa duplikat
+    const seenKeys = new Set();
+    const finalResults = [];
+
+    for (const raw of allRawItems) {
+        const song = normalizeSong(raw);
+        if (!song || !song.downloadUrl || !song.downloadUrl.length) continue;
+
+        // Kunci normalisasi judul: abaikan tanda baca, whitespace, dan teks (remastered/karaoke/instrumental jika ada versi asli)
+        const cleanTitle = song.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const cleanArtist = (song.artists?.primary?.[0]?.name || song.artist || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const key = `${cleanTitle}_${cleanArtist.slice(0, 8)}`;
+
+        if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            finalResults.push(song);
+        }
+    }
+
+    if (finalResults.length > 0) {
+        console.log(`[Search] Total terkumpul ${finalResults.length} lagu unik untuk "${query}"`);
         return res.json({
             success: true,
             data: {
-                results: finalResults
+                results: finalResults.slice(0, requestedLimit),
+                total: finalResults.length,
+                page: requestedPage
             }
         });
     }
 
-    console.error(`[Search] Semua provider gagal untuk query "${query}". Terakhir: ${lastErrorReason}`);
-    return res.status(502).json({
+    console.error(`[Search] Tidak ada lagu yang ditemukan untuk "${query}"`);
+    return res.status(404).json({
         success: false,
-        error: 'Semua provider pencarian gagal atau tidak tersedia.'
+        error: 'Tidak ada lagu yang ditemukan.'
     });
+});
+
+// Endpoint untuk mendapatkan foto artis / band secara real-time
+app.get('/api/artist-image', async (req, res) => {
+    try {
+        const name = (req.query.q || req.query.name || '').trim();
+        if (!name) return res.status(400).json({ success: false, error: 'Query name is required' });
+
+        const deezerRes = await axios.get(`https://api.deezer.com/search/artist?q=${encodeURIComponent(name)}`, {
+            timeout: 5000,
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+
+        if (deezerRes.data?.data?.[0]?.picture_big) {
+            return res.json({
+                success: true,
+                image: deezerRes.data.data[0].picture_big,
+                name: deezerRes.data.data[0].name
+            });
+        }
+
+        return res.status(404).json({ success: false, error: 'Artist photo not found' });
+    } catch (e) {
+        return res.status(500).json({ success: false, error: e.message });
+    }
 });
 
 app.get('/api/lyrics', async (req, res) => {
@@ -508,24 +574,26 @@ const sendIndexHtml = (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 };
 
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, error: 'API endpoint not found' });
+});
+
 try { app.get('/*splat', sendIndexHtml); } catch (e) {}
 try { app.get('*', sendIndexHtml); } catch (e) {}
 
-if (require.main === module && process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT && process.env.PORT !== '8080' ? process.env.PORT : 3000;
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log('');
-        console.log('╔══════════════════════════════════════════════╗');
-        console.log('║  🎵 GOYZFY v8.0 - SERVER RUNNING            ║');
-        console.log('╠══════════════════════════════════════════════╣');
-        console.log(`║  🌐 Buka di browser:                         ║`);
-        console.log(`║     http://0.0.0.0:${PORT}                   ║`);
-        console.log('║                                              ║');
-        console.log('║  👤 Creator: Bumi (Agoy) - Tambun Utara     ║');
-        console.log('║  ⚡ Status : READY                          ║');
-        console.log('╚══════════════════════════════════════════════╝');
-        console.log('');
-    });
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log('');
+    console.log('╔══════════════════════════════════════════════╗');
+    console.log('║  🎵 GOYZFY v8.0 - SERVER RUNNING            ║');
+    console.log('╠══════════════════════════════════════════════╣');
+    console.log(`║  🌐 Buka di browser:                         ║`);
+    console.log(`║     http://0.0.0.0:${PORT}                   ║`);
+    console.log('║                                              ║');
+    console.log('║  👤 Creator: Bumi (Agoy) - Tambun Utara     ║');
+    console.log('║  ⚡ Status : READY                          ║');
+    console.log('╚══════════════════════════════════════════════╝');
+    console.log('');
+});
 
 module.exports = app;
